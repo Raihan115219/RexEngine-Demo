@@ -903,7 +903,24 @@ function renderOverview() {
   const next = state.content.filter(c => c.status === 'scheduled' && c.date > new Date()).sort((a, b) => a.date - b.date)[0];
   const p = getProp('p1');
   return `
-    ${overviewHero(p, k, review, next)}
+    ${pageHeader({
+      eyebrow: `<p class="text-[13px] font-medium text-brand-700 flex items-center gap-2 mb-1.5">${ic('calendar', 'w-4 h-4')}${fmtDate(new Date(), { weekday: 'long', month: 'long', day: 'numeric' })}</p>`,
+      title: `${greeting()}, Alex`,
+      subtitle: review ? `You have <b class="font-medium text-ink">${review} posts</b> waiting for your review.` : 'Your property marketing, all in one place.',
+      actions: `<button class="btn btn-secondary" data-action="go" data-route="studio">${ic('wand-sparkles')}Create Content</button><button class="btn btn-primary" data-action="add-property">${ic('plus')}Add Property</button>`,
+    })}
+
+    <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5">
+      ${kpiCard({ route: 'properties', icon: 'building-2', tint: 'bg-blue-50 text-blue-600', label: 'Total properties', value: k.properties, unit: 'listings', bars: [3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9], tone: 'blue', foot: `${deltaPill(`+${addedThisMonth()}`)}<span class="text-[11.5px] text-sub">this month</span>`, d: 0 })}
+      ${kpiCard({ route: 'approvals', icon: 'file-pen-line', tint: 'bg-amber-50 text-amber-600', label: 'Content drafts', value: k.drafts, unit: 'drafts', bars: [2, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8], tone: 'orange', foot: `${deltaPill(`${review} to review`, 'warn', 'eye')}`, d: 1 })}
+      ${kpiCard({ route: 'calendar', icon: 'calendar-clock', tint: 'bg-brand-50 text-brand-600', label: 'Scheduled posts', value: k.scheduled, unit: 'queued', bars: [4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 10], tone: 'indigo', foot: `<span class="text-[11.5px] text-sub truncate">${next ? `Next: ${relDay(next.date)}, ${fmtTime(next.date)}` : 'Nothing queued'}</span>`, d: 2 })}
+      ${kpiCard({ route: 'calendar', icon: 'send', tint: 'bg-emerald-50 text-emerald-600', label: 'Published this week', value: k.published, unit: 'posts', bars: [2, 3, 3, 4, 5, 4, 6, 7, 6, 8, 9, 11], tone: 'green', foot: `${deltaPill('+12%')}<span class="text-[11.5px] text-sub">vs last week</span>`, d: 3 })}
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mt-5">
+      ${performanceCard()}
+      ${platformMixCard()}
+    </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mt-5">
       ${featuredCard(p)}
@@ -916,163 +933,86 @@ function renderOverview() {
     </div>`;
 }
 
-function overviewHero(p, k, review, next) {
-  const all = state.content;
-  const byP = P_ORDER.map(x => ({ id: x, n: all.filter(c => c.platform === x).length }));
-  const maxP = Math.max(1, ...byP.map(b => b.n));
-  const propItems = all.filter(c => c.propertyId === p.id);
-  const connected = state.accounts.filter(a => a.status === 'connected').length;
-  const chip = (x, pos, d) => {
-    const its = propItems.filter(c => c.platform === x);
-    const st = its.length ? STATUS[its.sort((a, b) => b.generatedAt - a.generatedAt)[0].status].label : 'Not started';
-    const top = pos.includes('pin-top');
-    const pin = `<span class="pin" style="--c:${({ instagram: '#E1306C', facebook: '#1877F2', linkedin: '#0A66C2', x: '#111827', youtube: '#FF0033' })[x]}"></span>`;
-    return `
-      <button class="chip-pin ${pos}" style="--d:${d}s" data-action="studio-open" data-prop="${p.id}" data-platform="${x}" aria-label="${PLATFORMS[x].name}: ${its.length} posts, ${st}. Open in Content Studio">
-        ${top ? pin : ''}
-        <span class="orb-chip">${pIcon(x, 'md')}<span class="min-w-0 text-left"><small>${PLATFORMS[x].name}</small><b>${its.length ? `${its.length} post${its.length > 1 ? 's' : ''}` : 'Generate'}</b></span></span>
-        ${top ? '' : pin}
-      </button>`;
-  };
+function kpiCard({ route, icon, tint, label, value, unit, bars, tone, foot, d }) {
   return `
-    <section class="ov-hero" aria-labelledby="ov-title">
-      <div class="ov-grid">
+    <a href="#/${route}" class="card ov-kpi" style="--i:${d}" aria-label="${label}: ${value}">
+      <span class="flex items-center justify-between gap-2">
+        <span class="ov-kpi-h"><span class="stat-icon !w-9 !h-9 !rounded-[11px] ${tint}">${ic(icon, 'w-[18px] h-[18px]')}</span>${label}</span>
+        <span class="kpi-go text-muted">${ic("arrow-up-right", "w-4 h-4")}</span>
+      </span>
+      <span class="val tnum mt-1"><b data-count="${value}">${value}</b> <small>${unit}</small></span>
+      ${sparkBars(bars, tone)}
+      <span class="flex items-center gap-2 min-w-0">${foot}</span>
+    </a>`;
+}
 
-        <div class="ov-left">
-          <p class="ov-date in-blur" style="--d:.15s">${ic('calendar', 'w-4 h-4')}${fmtDate(new Date(), { weekday: 'long', month: 'long', day: 'numeric' })}</p>
-          <h1 id="ov-title" class="ov-title">
-            <span class="mask"><span style="--d:.25s">${greeting()},</span></span>
-            <span class="mask"><span class="tint" style="--d:.36s">Alex</span></span>
-          </h1>
-          <p class="ov-sub in-blur" style="--d:.45s">Your property marketing, all in one place.</p>
+/* Smooth SVG path through points (Catmull-Rom → Bézier) */
+function smoothPath(pts) {
+  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += ` C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+  }
+  return d;
+}
 
-          <div class="ov-stat in-blur" style="--d:.55s">
-            <span class="label">Published this week</span>
-            <span class="big tnum"><b data-count="${k.published}">${k.published}</b> <small>posts</small></span>
-            <span class="flex items-center gap-2 flex-wrap">${deltaPill('+12%')}<span class="text-[12.5px] text-sub">vs last week · ${connected} channels live</span></span>
-          </div>
-
-          <div class="flex flex-wrap gap-2.5 in-blur" style="--d:.62s">
-            <button class="btn btn-primary" data-action="add-property">${ic('plus')}Add Property</button>
-            <button class="btn btn-secondary" data-action="go" data-route="studio">${ic('wand-sparkles')}Create Content</button>
-          </div>
-
-          <div class="ov-mini">
-            <a href="#/properties" class="card ov-row in-blur" style="--d:.72s">
-              <span class="stat-icon bg-blue-50 text-blue-600">${ic('building-2')}</span>
-              <span class="min-w-0 flex-1"><span class="block text-[12.5px] text-sub">Total properties</span><span class="block text-[21px] font-semibold tracking-tight tnum leading-tight"><b data-count="${k.properties}" class="font-semibold">${k.properties}</b></span></span>
-              <span class="flex flex-col items-end gap-1">${deltaPill(`+${addedThisMonth()}`)}<span class="text-[11px] text-muted">this month</span></span>
-            </a>
-            <a href="#/approvals" class="card ov-row in-blur" style="--d:.82s">
-              <span class="stat-icon bg-amber-50 text-amber-600">${ic('file-pen-line')}</span>
-              <span class="min-w-0 flex-1"><span class="block text-[12.5px] text-sub">Content drafts</span><span class="block text-[21px] font-semibold tracking-tight tnum leading-tight"><b data-count="${k.drafts}" class="font-semibold">${k.drafts}</b></span></span>
-              <span class="flex flex-col items-end gap-1">${deltaPill(`${review} to review`, 'warn', 'eye')}<span class="text-[11px] text-muted">approvals</span></span>
-            </a>
-            <a href="#/calendar" class="card ov-row in-blur" style="--d:.92s">
-              <span class="stat-icon bg-brand-50 text-brand-600">${ic('calendar-clock')}</span>
-              <span class="min-w-0 flex-1"><span class="block text-[12.5px] text-sub">Scheduled posts</span><span class="block text-[21px] font-semibold tracking-tight tnum leading-tight"><b data-count="${k.scheduled}" class="font-semibold">${k.scheduled}</b></span></span>
-              <span class="flex flex-col items-end gap-1 min-w-0"><span class="text-[11.5px] font-medium text-ink truncate max-w-[110px]">${next ? relDay(next.date) : 'Nothing queued'}</span><span class="text-[11px] text-muted">${next ? fmtTime(next.date) : ''}</span></span>
-            </a>
-          </div>
+function performanceCard() {
+  // Sample engagement series for the last 30 days (deterministic, demo only)
+  const vals = Array.from({ length: 30 }, (_, i) => 120 + i * 4.2 + Math.sin(i * 1.3) * 18 + Math.cos(i * 0.7) * 10);
+  const prev = Array.from({ length: 30 }, (_, i) => 105 + i * 2.4 + Math.cos(i * 1.1) * 14);
+  const W = 600, H = 190, max = Math.max(...vals, ...prev) * 1.08, min = Math.min(...vals, ...prev) * 0.85;
+  const xy = arr => arr.map((v, i) => [(i / (arr.length - 1)) * W, H - ((v - min) / (max - min)) * H]);
+  const cur = xy(vals), old = xy(prev);
+  const line = smoothPath(cur);
+  const total = Math.round(vals.reduce((a, b) => a + b, 0));
+  const last = cur[cur.length - 1];
+  return `
+    <section class="card xl:col-span-2 ov-perf" aria-labelledby="perf-title">
+      <div class="card-head">
+        <div class="min-w-0"><h2 id="perf-title" class="card-title">Engagement</h2><p class="text-[12.5px] text-sub mt-0.5">Likes, comments, shares and clicks · last 30 days · sample analytics</p></div>
+        <div class="flex items-center gap-3 text-[12px] text-sub flex-none">
+          <span class="flex items-center gap-1.5"><i class="w-2.5 h-2.5 rounded-full bg-brand-600"></i>This period</span>
+          <span class="hidden sm:flex items-center gap-1.5"><i class="w-2.5 h-[2px] bg-slate-300"></i>Previous</span>
         </div>
-
-        <div class="ov-center">
-          <div class="orb-wrap">
-            <div class="orb-halo" aria-hidden="true"></div>
-            <svg class="orbits" viewBox="0 0 500 500" aria-hidden="true">
-              <defs>
-                <path id="ovOrbitA" d="M 30 290 A 225 86 -14 1 1 470 210 A 225 86 -14 1 1 30 290"/>
-                <path id="ovOrbitB" d="M 60 160 A 205 70 22 1 1 440 340 A 205 70 22 1 1 60 160"/>
-              </defs>
-              <use href="#ovOrbitA" class="orbit-line"/><use href="#ovOrbitB" class="orbit-line o2"/>
-              <circle r="4.5" class="orbit-dot"><animateMotion dur="9s" repeatCount="indefinite"><mpath href="#ovOrbitA"/></animateMotion></circle>
-              <circle r="3.5" class="orbit-dot d2"><animateMotion dur="12s" begin="-4s" repeatCount="indefinite"><mpath href="#ovOrbitB"/></animateMotion></circle>
-              <circle r="3" class="orbit-dot d3"><animateMotion dur="9s" begin="-5s" repeatCount="indefinite"><mpath href="#ovOrbitA"/></animateMotion></circle>
-            </svg>
-            <div class="orb-float">
-              <button class="orb" data-action="view-property" data-id="${p.id}" aria-label="View featured property ${p.address}">
-                <span class="orb-img" style="background-image:url('${p.photos[0].src}')"></span>
-                <span class="orb-shade"></span><span class="orb-gloss"></span>
-              </button>
-            </div>
-            ${chip('instagram', 'c-ig', 1.3)}
-            ${chip('linkedin', 'c-li', 1.42)}
-            ${chip('youtube', 'c-yt', 1.54)}
-            ${chip('facebook', 'c-fb pin-top', 1.66)}
-            ${chip('x', 'c-x pin-top', 1.78)}
-          </div>
-          <div class="orb-caption in-blur" style="--d:1.1s">
-            <span class="min-w-0"><span class="block text-[11.5px] text-sub truncate">Featured · ${p.neighborhood}, ${p.city}</span><span class="block text-[14px] font-medium text-ink truncate">${p.address} · <span class="tnum">${money(p.price)}</span></span></span>
-            <button class="btn btn-primary btn-sm flex-none" data-action="studio-open" data-prop="${p.id}">${ic('sparkles')}Generate</button>
-          </div>
-        </div>
-
-        <div class="ov-right">
-          <div class="card ov-chart in-blur" style="--d:.7s">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-[14px] font-medium text-ink">Engagement trend</span>
-              <span class="ov-select">Last 30 days ${ic('chevron-down', 'w-3 h-3')}</span>
-            </div>
-            <div class="relative mt-3">
-              <span class="chart-flag">+12%</span>
-              <svg viewBox="0 0 260 120" preserveAspectRatio="none" role="img" aria-label="Engagement rising over the last 30 days (sample data)">
-                <defs><linearGradient id="ovArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5B55E6" stop-opacity=".3"/><stop offset="1" stop-color="#5B55E6" stop-opacity="0"/></linearGradient></defs>
-                <g class="grid-lines"><line x1="0" y1="20" x2="260" y2="20"/><line x1="0" y1="50" x2="260" y2="50"/><line x1="0" y1="80" x2="260" y2="80"/><line x1="0" y1="110" x2="260" y2="110"/></g>
-                <path class="area-fill" d="M0,98 C14,96 22,92 34,93 S52,86 64,87 S84,80 96,82 S116,74 128,72 S146,76 158,66 S180,58 192,56 S214,48 226,40 S246,30 260,24 L260,120 L0,120 Z" fill="url(#ovArea)"/>
-                <path class="area-line" d="M0,98 C14,96 22,92 34,93 S52,86 64,87 S84,80 96,82 S116,74 128,72 S146,76 158,66 S180,58 192,56 S214,48 226,40 S246,30 260,24" fill="none"/>
-                <circle class="area-end" cx="258" cy="24.5" r="4"/>
-              </svg>
-              <div class="flex justify-between text-[10.5px] text-muted mt-1.5"><span>${fmtDate(addDays(TODAY, -30))}</span><span>${fmtDate(addDays(TODAY, -20))}</span><span>${fmtDate(addDays(TODAY, -10))}</span><span>Today</span></div>
-            </div>
-          </div>
-
-          <div class="card ov-bars in-blur" style="--d:.82s">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-[14px] font-medium text-ink">Posts by platform</span>
-              <a href="#/calendar" class="ov-select">All time ${ic('chevron-right', 'w-3 h-3')}</a>
-            </div>
-            <ul class="mt-3.5 space-y-3">
-              ${byP.map(b => `<li class="ov-bar">${pIcon(b.id, 'sm')}<span class="text-[13px] text-slate-700">${PLATFORMS[b.id].name}</span><span class="track"><i class="fill f-${b.id}" style="width:${Math.max(6, Math.round((b.n / maxP) * 100))}%"></i></span><b class="tnum">${b.n}</b></li>`).join('')}
-            </ul>
-          </div>
-        </div>
-
-        <div class="ov-bottom">
-          <a href="#/approvals" class="card ov-kpi in-blur" style="--d:.95s">
-            <span class="ov-kpi-h">${ic('list-checks', 'w-4 h-4 text-amber-500')}Awaiting review</span>
-            <span class="val tnum"><b data-count="${review}">${review}</b> <small>posts</small></span>
-            ${sparkBars([2, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8], 'orange')}
-            <span class="flex items-center gap-2">${deltaPill('Today', 'warn')}<span class="text-[11.5px] text-sub">review queue</span></span>
-          </a>
-          <a href="#/calendar" class="card ov-kpi in-blur" style="--d:1.02s">
-            <span class="ov-kpi-h">${ic('calendar-clock', 'w-4 h-4 text-blue-500')}Scheduled</span>
-            <span class="val tnum"><b data-count="${k.scheduled}">${k.scheduled}</b> <small>queued</small></span>
-            ${sparkBars([3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10], 'blue')}
-            <span class="flex items-center gap-2">${deltaPill('+4')}<span class="text-[11.5px] text-sub">vs last week</span></span>
-          </a>
-          <a href="#/studio" class="card ov-kpi in-blur" style="--d:1.09s">
-            <span class="ov-kpi-h">${ic('sparkles', 'w-4 h-4 text-brand-600')}AI generations</span>
-            <span class="val tnum"><b data-count="${state.credits.used}">${num(state.credits.used)}</b> <small>credits</small></span>
-            ${sparkBars([4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 10], 'indigo')}
-            <span class="flex items-center gap-2">${deltaPill(`${num(state.credits.total - state.credits.used)} left`, 'neutral', 'zap')}</span>
-          </a>
-          <a href="#/social" class="card ov-kpi in-blur" style="--d:1.16s">
-            <span class="ov-kpi-h">${ic('share-2', 'w-4 h-4 text-emerald-500')}Channels live</span>
-            <span class="val tnum"><b data-count="${connected}">${connected}</b> <small>of 5</small></span>
-            ${sparkBars([1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4].map(v => Math.min(v, connected || 1)), 'green')}
-            <span class="flex items-center gap-2">${connected < 5 ? deltaPill(`${5 - connected} to connect`, 'warn', 'plug') : deltaPill('All connected')}</span>
-          </a>
-          <button class="card ov-promo in-blur" style="--d:1.23s" data-action="add-property">
-            <span class="ov-promo-text">
-              <b>Your Next Listing, Live in Minutes</b>
-              <span>Paste a listing URL or add details manually. AI drafts every platform.</span>
-              <span class="btn btn-primary btn-xs">${ic('download')}Import a listing</span>
-            </span>
-            <span class="ov-promo-img" aria-hidden="true" style="background-image:url('${U('1613490493576-7fde63acd811', 700, 420)}')"></span>
-          </button>
-        </div>
-
       </div>
+      <div class="p-5 pt-4">
+        <div class="grid grid-cols-3 gap-3 sm:gap-6 mb-4">
+          <div><div class="text-[12px] text-sub">Total engagements</div><div class="mt-0.5 flex items-baseline gap-2 flex-wrap"><span class="text-[22px] font-semibold tracking-tight tnum"><b data-count="${total}" class="font-semibold">${num(total)}</b></span>${deltaPill('+12%')}</div></div>
+          <div><div class="text-[12px] text-sub">Avg. per post</div><div class="mt-0.5 text-[22px] font-semibold tracking-tight tnum">${num(Math.round(total / 36))}</div></div>
+          <div><div class="text-[12px] text-sub">Best posting time</div><div class="mt-0.5 text-[22px] font-semibold tracking-tight">Thu, 6 PM</div></div>
+        </div>
+        <div class="relative">
+          <svg class="perf-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Engagement trending up over the last 30 days compared with the previous period (sample data)">
+            <defs><linearGradient id="perfArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5B55E6" stop-opacity=".26"/><stop offset="1" stop-color="#5B55E6" stop-opacity="0"/></linearGradient></defs>
+            <g class="grid-lines">${[0.2, 0.45, 0.7, 0.95].map(f => `<line x1="0" y1="${(H * f).toFixed(1)}" x2="${W}" y2="${(H * f).toFixed(1)}"/>`).join('')}</g>
+            <path d="${smoothPath(old)}" fill="none" class="prev-line"/>
+            <path class="area-fill" d="${line} L${W},${H} L0,${H} Z" fill="url(#perfArea)"/>
+            <path class="area-line" d="${line}" fill="none"/>
+            <circle class="area-end" cx="${last[0] - 2}" cy="${last[1].toFixed(1)}" r="4.5"/>
+          </svg>
+          <div class="flex justify-between text-[11px] text-muted mt-2"><span>${fmtDate(addDays(TODAY, -29))}</span><span>${fmtDate(addDays(TODAY, -22))}</span><span>${fmtDate(addDays(TODAY, -15))}</span><span>${fmtDate(addDays(TODAY, -8))}</span><span>Today</span></div>
+        </div>
+      </div>
+    </section>`;
+}
+
+function platformMixCard() {
+  const all = state.content;
+  const byP = P_ORDER.map(x => ({ id: x, n: all.filter(c => c.platform === x).length, live: all.filter(c => c.platform === x && c.status === 'published').length }));
+  const maxP = Math.max(1, ...byP.map(b => b.n));
+  return `
+    <section class="card flex flex-col" aria-labelledby="mix-title">
+      <div class="card-head">
+        <div class="min-w-0"><h2 id="mix-title" class="card-title">Posts by platform</h2><p class="text-[12.5px] text-sub mt-0.5">${all.length} posts across all statuses</p></div>
+        <a href="#/calendar" class="btn btn-ghost btn-sm">Calendar${ic('arrow-right')}</a>
+      </div>
+      <ul class="p-5 pt-4 space-y-4 flex-1">
+        ${byP.map(b => `
+          <li class="ov-bar">${pIcon(b.id, 'sm')}<span class="text-[13px] text-slate-700">${PLATFORMS[b.id].name}</span><span class="track"><i class="fill f-${b.id}" style="width:${Math.max(6, Math.round((b.n / maxP) * 100))}%"></i></span><b class="tnum">${b.n}</b></li>`).join('')}
+      </ul>
+      <div class="px-5 pb-5"><button class="btn btn-secondary w-full" data-action="go" data-route="studio">${ic('sparkles')}Generate more content</button></div>
     </section>`;
 }
 
