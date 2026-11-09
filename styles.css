@@ -830,3 +830,21 @@ button.cal-num:hover { background: #F1F1F4; }
 @keyframes draw { from { stroke-dashoffset: 1400; } to { stroke-dashoffset: 0; } }
 @media (max-width: 640px) { .ov-kpi { padding: 14px; } .ov-kpi .val { font-size: 23px; } .ov-kpi-h { font-size: 12px; gap: 7px; white-space: normal; line-height: 1.25; } .kpi-go { display: none; } }
 
+
+/* Content Studio — simplified layout */
+.st-prop { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 14px; background: rgba(248, 250, 252, .8); border: 1px solid var(--line); }
+.st-prop img { width: 56px; height: 56px; border-radius: 11px; object-fit: cover; flex: none; }
+.st-ai-ic { width: 36px; height: 36px; border-radius: 11px; display: grid; place-content: center; flex: none; color: #fff; background: linear-gradient(135deg, #6D67F0, #3B35D6); box-shadow: 0 6px 14px -6px rgba(59, 53, 214, .7); }
+.st-ai-ic svg { width: 18px; height: 18px; }
+.st-ai-compact { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 16px; }
+.st-tools { display: flex; flex-wrap: wrap; gap: 6px; }
+.st-tool { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 99px; font-size: 12.5px; font-weight: 500; color: #3F3AB8; background: var(--brand-soft, #EEEDFD); border: 1px solid transparent; transition: background .2s, border-color .2s; }
+.st-tool:hover:not(:disabled) { background: #E4E2FC; border-color: #D3D0FA; }
+.st-tool:disabled { opacity: .5; cursor: not-allowed; }
+.st-tool svg { width: 14px; height: 14px; }
+.st-more summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--sub, #64748B); user-select: none; }
+.st-more summary::-webkit-details-marker { display: none; }
+.st-more summary:hover { color: var(--ink, #111827); }
+.st-more summary svg { width: 15px; height: 15px; transition: transform .2s var(--ease); }
+.st-more[open] summary svg { transform: rotate(90deg); }
+@media (max-width: 640px) { .st-ai-compact > .flex-none { width: 100%; } .st-ai-compact > .flex-none .btn { flex: 1; } }

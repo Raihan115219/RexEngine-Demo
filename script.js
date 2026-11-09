@@ -1701,17 +1701,16 @@ function openStudio(pid, { platform, autoGenerate = false, itemId } = {}) {
 }
 
 function renderStudio() {
-  const d = draft();
   return `
     ${pageHeader({
       title: 'Content Studio',
-      subtitle: 'Turn your property listings into high-performing marketing content.',
+      subtitle: 'Create posts for every platform from one listing.',
       actions: `<span id="studio-status">${studioStatusChip()}</span><button class="btn btn-secondary" data-action="go" data-route="approvals">${ic('list-checks')}Approvals</button>`,
     })}
     <div class="grid grid-cols-1 lg:grid-cols-[264px_minmax(0,1fr)] xl:grid-cols-[264px_minmax(0,1fr)_340px] 2xl:grid-cols-[296px_minmax(0,1fr)_372px] gap-5 items-start">
       <aside id="studio-left" class="space-y-5 min-w-0" aria-label="Property and media">${studioLeftHTML()}</aside>
-      <section id="studio-editor" class="min-w-0" aria-label="Content editor">${studioEditorHTML()}</section>
-      <aside id="studio-preview" class="min-w-0 lg:col-span-2 xl:col-span-1 xl:sticky xl:top-[88px]" aria-label="Live preview">${studioPreviewHTML()}</aside>
+      <section id="studio-editor" class="min-w-0 space-y-5" aria-label="Content editor">${studioEditorHTML()}</section>
+      <aside id="studio-preview" class="min-w-0 lg:col-span-2 xl:col-span-1 xl:sticky xl:top-[88px]" aria-label="Preview">${studioPreviewHTML()}</aside>
     </div>`;
 }
 function studioStatusChip() {
@@ -1723,81 +1722,98 @@ function studioStatusChip() {
 function studioLeftHTML() {
   const p = studioProp();
   const multi = S.format === 'carousel';
+  const cover = p.photos[S.images[0]] || p.photos[0];
   return `
     <div class="card p-4">
       <label class="label" for="studio-prop">Property</label>
       <select id="studio-prop" class="select" data-change="studioProp">
         ${state.properties.map(x => `<option value="${x.id}" ${x.id === p.id ? 'selected' : ''}>${esc(x.address)} — ${x.city}</option>`).join('')}
       </select>
-      <div class="mt-4 rounded-xl overflow-hidden border border-line">
-        <div class="relative aspect-[16/10] bg-slate-200"><img src="${(p.photos[S.images[0]] || p.photos[0]).src}" alt="${esc(p.address)}" class="w-full h-full object-cover pv-fade" id="studio-cover"><div class="absolute top-2.5 left-2.5">${glassBadge(p.status)}</div></div>
-        <div class="p-3.5">
-          <div class="flex items-start justify-between gap-2"><div class="min-w-0"><div class="text-[14px] font-semibold text-ink truncate">${esc(p.address)}</div><div class="text-[12.5px] text-sub truncate">${p.neighborhood}, ${p.city}, ${p.state}</div></div><div class="text-[14px] font-semibold tnum">${money(p.price)}</div></div>
-          <div class="mt-2.5">${specs(p, 'text-[12px] text-slate-600 gap-x-3 gap-y-1')}</div>
+      <div class="st-prop mt-3">
+        <img src="${cover.thumb || cover.src}" alt="" id="studio-cover">
+        <div class="min-w-0">
+          <div class="text-[15px] font-semibold text-ink tnum">${money(p.price)}</div>
+          <div class="text-[12.5px] text-sub truncate">${p.beds} bd · ${p.baths} ba · ${num(p.sqft)} sqft</div>
+          <div class="text-[12.5px] text-sub truncate">${p.city}, ${p.state}</div>
         </div>
       </div>
-      <div class="mt-3 flex flex-wrap gap-1.5">${p.features.slice(0, 3).map(f => `<span class="tag !h-6 !text-[11.5px]">${esc(f)}</span>`).join('')}</div>
     </div>
     <div class="card p-4">
-      <div class="flex items-center justify-between">
-        <div><div class="text-[14px] font-semibold text-ink">Media</div><div class="text-[12px] text-sub">${multi ? `Select up to 10 · <b class="font-semibold text-ink">${S.images.length}</b> selected` : 'Choose the post image'}</div></div>
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-[14px] font-semibold text-ink">${multi ? `Images <span class="font-normal text-sub tnum">${S.images.length}/10</span>` : 'Image'}</div>
         <button class="btn btn-ghost btn-xs" data-action="go" data-route="media">${ic('images')}Library</button>
       </div>
-      <div class="mt-3 grid grid-cols-3 gap-2" role="listbox" aria-label="Available images" aria-multiselectable="${multi}">
+      <div class="grid grid-cols-6 lg:grid-cols-3 gap-2" role="listbox" aria-label="Available images" aria-multiselectable="${multi}">
         ${p.photos.map((ph, i) => { const sel = S.images.indexOf(i); return `
           <button class="sel-ring relative rounded-lg overflow-hidden aspect-square bg-slate-100 ${sel > -1 ? 'on' : ''}" data-action="studio-img" data-i="${i}" role="option" aria-selected="${sel > -1}" aria-label="${esc(ph.label)}" title="${esc(ph.label)}">
             <img src="${ph.thumb}" alt="" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
             <span class="sel-check">${multi && sel > -1 ? `<span class="sel-num">${sel + 1}</span>` : ic('check')}</span>
           </button>`; }).join('')}
       </div>
-      <p class="hint mt-3 flex items-center gap-1.5">${ic('info', 'w-3.5 h-3.5')}${multi ? 'Order follows your selection.' : 'Switch to Carousel to select multiple images.'}</p>
+    </div>`;
+}
+
+function studioAIHTML() {
+  const has = Object.keys(S.drafts).length > 0;
+  const busy = S.generating || S.busy;
+  if (has && !S.aiOpen && !S.generating) {
+    return `
+      <div class="ai-panel st-ai-compact">
+        <span class="st-ai-ic">${ic('sparkles')}</span>
+        <div class="min-w-0 flex-1">
+          <div class="text-[14px] font-semibold text-ink">5 drafts ready</div>
+          <div class="text-[12.5px] text-sub truncate">${TONES[S.tone]} · ${AUDIENCES[S.audience]} · ${GOALS[S.goal]}</div>
+        </div>
+        <div class="flex gap-2 flex-none">
+          <button class="btn btn-ghost btn-sm" data-action="studio-ai-open">${ic('sliders-horizontal')}Adjust</button>
+          <button class="btn btn-secondary btn-sm" data-action="studio-generate" ${busy ? 'disabled' : ''}>${ic('refresh-cw')}Regenerate</button>
+        </div>
+      </div>`;
+  }
+  const toneIc = { professional: 'briefcase', luxury: 'gem', friendly: 'smile', investment: 'trending-up' };
+  return `
+    <div class="ai-panel p-4 sm:p-5">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3"><span class="st-ai-ic">${ic('sparkles')}</span><span class="text-[15px] font-semibold text-ink">Write with AI</span></div>
+        <span class="ai-badge" title="Demo mode: sample copy, no AI API is called">${ic('zap')}25 credits</span>
+      </div>
+      <div class="mt-4">
+        <span class="label">Tone</span>
+        <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="Tone">${Object.entries(TONES).map(([k, l]) => `<button class="chip ${S.tone === k ? 'on' : ''}" role="radio" aria-checked="${S.tone === k}" data-action="studio-tone" data-v="${k}">${ic(toneIc[k])}${l}</button>`).join('')}</div>
+      </div>
+      <div class="mt-4 grid grid-cols-2 gap-3">
+        <div><label class="label" for="st-aud">Audience</label><select id="st-aud" class="select" data-change="studioAudience">${Object.entries(AUDIENCES).map(([k, l]) => `<option value="${k}" ${S.audience === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+        <div><label class="label" for="st-goal">Goal</label><select id="st-goal" class="select" data-change="studioGoal">${Object.entries(GOALS).map(([k, l]) => `<option value="${k}" ${S.goal === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      </div>
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <button id="gen-btn" class="btn btn-primary" data-action="studio-generate" ${busy ? 'disabled' : ''}>${S.generating ? '<span class="spinner"></span>Generating…' : `${ic('sparkles')}${has ? 'Regenerate all' : 'Generate posts'}`}</button>
+        ${has && !S.generating ? '<button class="btn btn-ghost" data-action="studio-ai-close">Cancel</button>' : ''}
+      </div>
+      <div id="gen-progress" class="${S.generating ? '' : 'hidden'}"></div>
     </div>`;
 }
 
 function studioEditorHTML() {
-  const p = studioProp();
   const d = draft() || { caption: '', description: '', hashtags: '', cta: '' };
   const pl = S.platform;
   const lim = limitFor(pl, S.format);
   const len = composed(pl, draft()).length;
   const busy = S.generating || S.busy;
+  const has = Object.keys(S.drafts).length > 0;
   const capLabel = pl === 'youtube' ? (S.format === 'post' ? 'Community post' : 'Title') : pl === 'x' ? 'Post' : 'Caption';
+  const tools = [['regenerate', 'refresh-cw', 'Rewrite'], ['improve', 'wand-sparkles', 'Improve'], ['shorten', 'scissors', 'Shorten'], ['professional', 'briefcase', 'More formal']];
+  const moreOpen = S.showMore || (pl === 'x' && S.format === 'thread');
   return `
+    ${studioAIHTML()}
     <div class="card overflow-hidden">
       <div class="px-3 sm:px-4 pt-3 pb-3 border-b border-line bg-[#FAFAFB]">
         <div class="flex gap-1 overflow-x-auto no-scrollbar" role="tablist" aria-label="Platform">
-          ${P_ORDER.map(x => `<button class="ptab ${x === pl ? 'on' : ''}" role="tab" aria-selected="${x === pl}" data-action="studio-platform" data-p="${x}">${pIcon(x, 'sm')}<span class="${x === pl ? '' : 'hidden 2xl:inline'}">${PLATFORMS[x].name}</span>${S.drafts[x] ? '<span class="pdot" title="Draft ready"></span>' : ''}</button>`).join('')}
+          ${P_ORDER.map(x => `<button class="ptab ${x === pl ? 'on' : ''}" role="tab" aria-selected="${x === pl}" data-action="studio-platform" data-p="${x}" title="${PLATFORMS[x].name}">${pIcon(x, 'sm')}<span class="${x === pl ? '' : 'hidden 2xl:inline'}">${PLATFORMS[x].name}</span>${S.drafts[x] ? '<span class="pdot" title="Draft ready"></span>' : ''}</button>`).join('')}
         </div>
       </div>
       <div class="p-4 sm:p-5 space-y-5">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div class="seg seg-fmt w-full grid grid-cols-5" role="radiogroup" aria-label="Content format">
-            ${Object.entries(FORMATS).map(([k, f]) => { const ok = PLATFORMS[pl].formats.includes(k); return `<button role="radio" aria-checked="${S.format === k}" class="${S.format === k ? 'on' : ''}" data-action="studio-format" data-f="${k}" ${ok ? '' : `disabled title="Not available on ${PLATFORMS[pl].name}"`}>${ic(f.icon)}${f.label}</button>`; }).join('')}
-          </div>
-          <span class="text-[12px] text-sub flex items-center gap-1.5 -mt-2">${ic('target', 'w-3.5 h-3.5')}${TONES[S.tone]} · ${AUDIENCES[S.audience]} · ${GOALS[S.goal]}</span>
-        </div>
-
-        <div class="ai-panel p-4 sm:p-5">
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-[10px] bg-gradient-to-br from-brand-500 to-brand-700 text-white grid place-content-center shadow-[0_4px_12px_-4px_rgba(5,150,105,.6)]">${ic('sparkles')}</div>
-              <div><div class="text-[14.5px] font-semibold text-ink">AI generation</div><div class="text-[12.5px] text-sub">Writes platform-specific copy for all 5 channels from this listing.</div></div>
-            </div>
-            <span class="hidden sm:inline-flex ai-badge">${ic('zap')}25 credits</span>
-          </div>
-          <div class="mt-4">
-            <span class="label">Tone</span>
-            <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="Tone">${Object.entries(TONES).map(([k, l]) => `<button class="chip ${S.tone === k ? 'on' : ''}" role="radio" aria-checked="${S.tone === k}" data-action="studio-tone" data-v="${k}">${ic({ professional: 'briefcase', luxury: 'gem', friendly: 'smile', investment: 'trending-up' }[k])}${l}</button>`).join('')}</div>
-          </div>
-          <div class="mt-4 grid sm:grid-cols-2 gap-3">
-            <div><label class="label" for="st-aud">Audience</label><select id="st-aud" class="select" data-change="studioAudience">${Object.entries(AUDIENCES).map(([k, l]) => `<option value="${k}" ${S.audience === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
-            <div><label class="label" for="st-goal">Content goal</label><select id="st-goal" class="select" data-change="studioGoal">${Object.entries(GOALS).map(([k, l]) => `<option value="${k}" ${S.goal === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
-          </div>
-          <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-            <button id="gen-btn" class="btn btn-primary" data-action="studio-generate" ${busy ? 'disabled' : ''}>${S.generating ? '<span class="spinner"></span>Generating…' : `${ic('sparkles')}${Object.keys(S.drafts).length ? 'Regenerate all with AI' : 'Generate with AI'}`}</button>
-            <span class="hint flex items-center gap-1.5">${ic('flask-conical', 'w-3.5 h-3.5')}Demo mode — sample copy, no AI API is called.</span>
-          </div>
-          <div id="gen-progress" class="${S.generating ? '' : 'hidden'}"></div>
+        <div class="seg seg-fmt w-full grid grid-cols-5" role="radiogroup" aria-label="Content format">
+          ${Object.entries(FORMATS).map(([k, f]) => { const ok = PLATFORMS[pl].formats.includes(k); return `<button role="radio" aria-checked="${S.format === k}" class="${S.format === k ? 'on' : ''}" data-action="studio-format" data-f="${k}" ${ok ? '' : `disabled title="Not available on ${PLATFORMS[pl].name}"`}>${ic(f.icon)}${f.label}</button>`; }).join('')}
         </div>
 
         <div id="studio-fields" class="space-y-5 ${S.generating ? 'opacity-60 pointer-events-none' : ''}">
@@ -1807,18 +1823,13 @@ function studioEditorHTML() {
               <span id="cap-count" class="text-[12px] tnum ${len > lim ? 'text-red-600 font-medium' : 'text-muted'}">${num(len)} / ${num(lim)}</span>
             </div>
             <div class="relative ${S.busy ? 'ai-shimmer rounded-[9px]' : ''}">
-              <textarea id="f-caption" class="textarea ${len > lim ? 'is-invalid' : ''}" rows="${pl === 'youtube' && S.format !== 'post' ? 2 : 8}" data-field="caption" placeholder="${Object.keys(S.drafts).length ? 'Write your caption…' : 'Click “Generate with AI” or start writing your caption…'}" ${busy ? 'readonly' : ''}>${esc(d.caption)}</textarea>
+              <textarea id="f-caption" class="textarea ${len > lim ? 'is-invalid' : ''}" rows="${pl === 'youtube' && S.format !== 'post' ? 2 : 7}" data-field="caption" placeholder="${has ? 'Write your caption…' : 'Generate posts above, or start typing…'}" ${busy ? 'readonly' : ''}>${esc(d.caption)}</textarea>
             </div>
-            <div class="mt-2.5 flex flex-wrap gap-2" aria-label="AI writing tools">
-              ${[['regenerate', 'refresh-cw', 'Regenerate'], ['improve', 'wand-sparkles', 'Improve Copy'], ['shorten', 'scissors', 'Shorten'], ['professional', 'briefcase', 'Make More Professional']].map(([k, i, l]) => `<button class="btn btn-secondary btn-xs" data-action="studio-tool" data-k="${k}" ${busy ? 'disabled' : ''}>${ic(i)}${l}</button>`).join('')}
-            </div>
+            ${(d.caption || has) ? `<div class="st-tools mt-2.5" aria-label="AI writing tools">
+              ${tools.map(([k, i, l]) => `<button class="st-tool" data-action="studio-tool" data-k="${k}" ${busy ? 'disabled' : ''}>${ic(i)}${l}</button>`).join('')}
+            </div>` : ''}
           </div>
-          <div>
-            <div class="flex items-center justify-between mb-1.5"><label class="label !mb-0" for="f-description">Description <span class="font-normal text-muted">· ${DESC_HINT[pl][0]}</span></label></div>
-            <textarea id="f-description" class="textarea" rows="${pl === 'youtube' || pl === 'x' ? 5 : 3}" data-field="description" placeholder="${DESC_HINT[pl][1]}" ${busy ? 'readonly' : ''}>${esc(d.description)}</textarea>
-            <p class="hint mt-1.5">${DESC_HINT[pl][1]}</p>
-          </div>
-          <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
+          <div class="grid sm:grid-cols-2 gap-4">
             <div>
               <div class="flex items-center justify-between mb-1.5"><label class="label !mb-0" for="f-hashtags">Hashtags</label><span id="tag-count" class="text-[12px] text-muted tnum">${tagCount(d.hashtags)} tags</span></div>
               <div class="input-icon">${ic('hash')}<input id="f-hashtags" class="input" data-field="hashtags" value="${esc(d.hashtags)}" placeholder="#JustListed #DreamHome" ${busy ? 'readonly' : ''}></div>
@@ -1828,15 +1839,16 @@ function studioEditorHTML() {
               <div class="input-icon">${ic('mouse-pointer-click')}<input id="f-cta" class="input" data-field="cta" value="${esc(d.cta)}" placeholder="Book a private tour" ${busy ? 'readonly' : ''}></div>
             </div>
           </div>
+          <details class="st-more" ${moreOpen ? 'open' : ''}>
+            <summary data-action="studio-more">${ic('chevron-right')}${DESC_HINT[pl][0]}</summary>
+            <textarea id="f-description" class="textarea mt-2.5" rows="${pl === 'youtube' || pl === 'x' ? 5 : 3}" data-field="description" placeholder="${DESC_HINT[pl][1]}" aria-label="${DESC_HINT[pl][0]}" ${busy ? 'readonly' : ''}>${esc(d.description)}</textarea>
+          </details>
         </div>
       </div>
-      <div class="px-4 sm:px-5 py-4 border-t border-line bg-[#FAFAFB] flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-3">
-        <span class="text-[12.5px] text-sub flex items-center gap-1.5" id="save-meta">${ic('cloud', 'w-4 h-4')}${draft()?.itemId ? `Saved to ${PLATFORMS[pl].name} queue` : 'Drafts auto-save in this session'}</span>
-        <div class="flex flex-wrap gap-2 [&>.btn]:flex-1 [&>.btn]:min-w-[112px] 2xl:[&>.btn]:flex-none">
-          <button class="btn btn-secondary" data-action="studio-save" ${busy ? 'disabled' : ''}>${ic('save')}Save Draft</button>
-          <button class="btn btn-soft" data-action="studio-approve" ${busy ? 'disabled' : ''}>${ic('badge-check')}Approve</button>
-          <button class="btn btn-primary" data-action="studio-schedule" ${busy ? 'disabled' : ''}>${ic('calendar-clock')}Schedule</button>
-        </div>
+      <div class="px-4 sm:px-5 py-4 border-t border-line bg-[#FAFAFB] flex flex-wrap justify-end gap-2 [&>.btn]:flex-1 sm:[&>.btn]:flex-none">
+        <button class="btn btn-ghost" data-action="studio-save" ${busy ? 'disabled' : ''}>${ic('save')}Save draft</button>
+        <button class="btn btn-soft" data-action="studio-approve" ${busy ? 'disabled' : ''}>${ic('badge-check')}Approve</button>
+        <button class="btn btn-primary" data-action="studio-schedule" ${busy ? 'disabled' : ''}>${ic('calendar-clock')}Schedule</button>
       </div>
     </div>`;
 }
@@ -1851,34 +1863,30 @@ function studioPreviewHTML() {
   const data = studioPreviewData();
   return `
     <div class="flex items-center justify-between mb-3 px-1">
-      <div class="flex items-center gap-2 min-w-0"><span class="text-[14px] font-semibold text-ink">Live preview</span><span class="badge b-gray truncate">${PLATFORMS[S.platform].name} · ${FORMATS[S.format].label}</span></div>
-      <span class="flex items-center gap-1.5 text-[12px] font-medium text-emerald-700"><span class="relative flex w-2 h-2"><span class="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-60"></span><span class="relative w-2 h-2 rounded-full bg-emerald-500"></span></span>Live</span>
+      <span class="text-[14px] font-semibold text-ink">Preview</span>
+      <span class="badge b-gray truncate">${PLATFORMS[S.platform].name} · ${FORMATS[S.format].label}</span>
     </div>
     <div id="pv-device">${buildPreview(data)}</div>
-    <div class="card mt-4 p-4" id="pv-checks">${checksHTML()}</div>
-    <p class="hint mt-3 px-1 text-center">Previews approximate each platform’s layout and may differ slightly when published.</p>`;
+    <div class="card mt-4 p-4" id="pv-checks">${checksHTML()}</div>`;
 }
 function checksHTML() {
   const d = draft(); const pl = S.platform; const lim = limitFor(pl, S.format);
   const len = composed(pl, d).length; const tags = d ? tagCount(d.hashtags) : 0; const [lo, hi] = PLATFORMS[pl].tagRange;
   const acct = getAcct(pl);
   const rows = [
-    !d || !d.caption ? ['warn', 'Caption is empty', 'Generate or write copy to continue.']
-      : len > lim ? ['bad', `Over the ${num(lim)}-character limit`, `Shorten by ${num(len - lim)} characters.`]
-        : ['ok', 'Length looks good', `${num(len)} of ${num(lim)} characters used.`],
-    !d ? ['warn', 'No hashtags yet', `${lo}–${hi} recommended on ${PLATFORMS[pl].name}.`]
-      : tags < lo || tags > hi ? ['warn', `${tags} hashtag${tags === 1 ? '' : 's'}`, `${lo}–${hi} recommended on ${PLATFORMS[pl].name}.`]
-        : ['ok', `${tags} hashtags`, 'Within the recommended range.'],
-    S.format === 'carousel' && S.images.length < 2 ? ['warn', 'Add more images', 'Carousels need at least 2 images.']
-      : ['ok', S.format === 'carousel' ? `${S.images.length} images selected` : 'Media ready', ['reel', 'short'].includes(S.format) ? 'Cropped to 9:16 for vertical video.' : 'Auto-cropped for this placement.'],
-    acct.status === 'connected' ? ['ok', 'Account connected', `Publishing as ${acct.account}.`]
-      : ['bad', acct.status === 'expired' ? `${PLATFORMS[pl].name} needs reconnecting` : `${PLATFORMS[pl].name} not connected`, `<button class="text-brand-700 font-medium hover:underline" data-action="connect" data-id="${pl}">${acct.status === 'expired' ? 'Reconnect' : 'Connect'} account</button> before scheduling.`],
+    !d || !d.caption ? ['warn', 'Add a caption']
+      : len > lim ? ['bad', `${num(len - lim)} characters over the limit`]
+        : ['ok', 'Length looks good'],
+    tags < lo || tags > hi ? ['warn', `Use ${lo}–${hi} hashtags`] : ['ok', `${tags} hashtags`],
+    S.format === 'carousel' && S.images.length < 2 ? ['warn', 'Pick at least 2 images'] : ['ok', 'Media ready'],
+    acct.status === 'connected' ? ['ok', `Posting as ${acct.account}`]
+      : ['bad', `${PLATFORMS[pl].name} ${acct.status === 'expired' ? 'needs reconnecting' : 'not connected'}`, `<button class="text-brand-700 font-medium hover:underline" data-action="connect" data-id="${pl}">${acct.status === 'expired' ? 'Reconnect' : 'Connect'}</button>`],
   ];
   const ico = { ok: ['circle-check', 'text-emerald-600'], warn: ['circle-alert', 'text-amber-500'], bad: ['circle-x', 'text-red-500'] };
   const okCount = rows.filter(r => r[0] === 'ok').length;
   return `
-    <div class="flex items-center justify-between mb-3"><span class="text-[13px] font-semibold text-ink">Pre-publish checks</span><span class="text-[12px] text-sub tnum">${okCount}/${rows.length} passed</span></div>
-    <ul class="space-y-2.5">${rows.map(([s, t, d2]) => `<li class="flex items-start gap-2.5">${ic(ico[s][0], `w-4 h-4 mt-0.5 flex-none ${ico[s][1]}`)}<div class="min-w-0"><div class="text-[13px] text-ink font-medium">${t}</div><div class="text-[12px] text-sub">${d2}</div></div></li>`).join('')}</ul>`;
+    <div class="flex items-center justify-between mb-3"><span class="text-[13px] font-semibold text-ink">Ready to publish</span><span class="text-[12px] tnum font-medium ${okCount === rows.length ? 'text-emerald-700' : 'text-sub'}">${okCount}/${rows.length}</span></div>
+    <ul class="space-y-2">${rows.map(([s, t, act]) => `<li class="flex items-center gap-2.5 text-[13px] ${s === 'ok' ? 'text-slate-600' : 'text-ink font-medium'}">${ic(ico[s][0], `w-4 h-4 flex-none ${ico[s][1]}`)}<span class="min-w-0 flex-1 truncate">${t}</span>${act ? `<span class="text-[12.5px] flex-none">${act}</span>` : ''}</li>`).join('')}</ul>`;
 }
 
 function rich(t, cls = 'pv-tag') {
@@ -2077,7 +2085,7 @@ async function studioGenerate() {
   const p = studioProp();
   S.generating = true; S.expanded = false;
   rStudioEditor();
-  const steps = [`Reading ${p.address} details & ${p.photos.length} photos`, `Applying ${TONES[S.tone].toLowerCase()} brand voice for ${AUDIENCES[S.audience].toLowerCase()}`, 'Writing Instagram, Facebook & LinkedIn copy', 'Writing X thread & YouTube Short script', 'Optimizing hashtags & calls to action'];
+  const steps = ['Reading the listing and photos', `Matching a ${TONES[S.tone].toLowerCase()} tone`, 'Writing Instagram, Facebook and LinkedIn posts', 'Writing the X thread and YouTube Short', 'Adding hashtags and calls to action'];
   const prog = $('#gen-progress');
   prog.innerHTML = `
     <div class="mt-4 rounded-[10px] border border-brand-100 bg-white p-4" role="status" aria-live="polite">
@@ -2103,7 +2111,7 @@ async function studioGenerate() {
     S.drafts[pl] = { ...generateContent(p, pl, fmt, { tone: S.tone, audience: S.audience, goal: S.goal, v: S.v }), format: fmt, itemId: prev?.itemId || null, status: prev?.itemId ? prev.status : 'draft', generated: true };
   });
   state.credits.used = Math.min(state.credits.total, state.credits.used + 25);
-  S.generating = false;
+  S.generating = false; S.aiOpen = false;
   rStudioEditor(); rStudioPreview(); renderSidebar();
   ['#f-caption', '#f-description', '#f-hashtags', '#f-cta'].forEach(s => { const el = $(s); el && el.classList.add('flash'); });
   toast('Content generated', `5 platform-ready posts created for ${p.address}.`, 'ai');
@@ -2984,6 +2992,9 @@ const A = {
   },
   'studio-tone': el => { S.tone = el.dataset.v; rStudioEditor(); },
   'studio-generate': () => studioGenerate(),
+  'studio-ai-open': () => { S.aiOpen = true; rStudioEditor(); },
+  'studio-ai-close': () => { S.aiOpen = false; rStudioEditor(); },
+  'studio-more': el => { S.showMore = !el.parentElement.open; },
   'studio-tool': el => studioTool(el.dataset.k),
   'studio-save': () => { const it = studioCommit('draft'); if (it) { rStudioEditor(); renderSidebar(); toast('Draft saved', `${PLATFORMS[it.platform].name} draft for ${getProp(it.propertyId).address}.`, 'success'); } },
   'studio-approve': () => { const it = studioCommit('approved'); if (it) { rStudioEditor(); renderSidebar(); toast('Content approved', `Ready to schedule · planned for ${relDay(it.date)} at ${fmtTime(it.date)}.`, 'success', { label: 'Schedule', fn: () => A['studio-schedule']() }); } },
