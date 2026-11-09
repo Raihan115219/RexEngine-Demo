@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>RexEngine — AI Real Estate Marketing</title>
+  <meta name="description" content="RexEngine turns property listings into ready-to-publish social media marketing for Instagram, Facebook, LinkedIn, X and YouTube.">
+  <meta name="theme-color" content="#F8F8FA">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%233B35D6'/%3E%3Cpath d='M8 15.5 16 9l8 6.5' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12.5 24v-7h4.3a2.6 2.6 0 0 1 0 5.2H12.5M16.6 22.2 19.5 24' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS (Play CDN) — utilities for layout; tokens mirror styles.css -->
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          colors: {
+            navy: { DEFAULT: '#18181B', 900: '#18181B', 800: '#27272A', 700: '#3F3F46' },
+            brand: { DEFAULT: '#3B35D6', 50: '#F3F2FE', 100: '#E7E6FD', 200: '#D4D2FB', 300: '#B4B0F7', 400: '#8A85F0', 500: '#5B55E6', 600: '#3B35D6', 700: '#2E28B0' },
+            canvas: '#F6F6F8',
+            line: '#EBEBEF',
+            ink: '#18181B',
+            sub: '#6B6B76',
+            muted: '#A1A1AA',
+          },
+          boxShadow: {
+            card: '0 1px 2px rgba(24,24,27,.04), 0 1px 3px rgba(24,24,27,.04)',
+            lift: '0 10px 24px -8px rgba(24,24,27,.10), 0 2px 6px -2px rgba(24,24,27,.05)',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <!-- Mobile drawer overlay -->
+  <div id="sb-overlay" class="sb-overlay" data-action="close-drawer" aria-hidden="true"></div>
+
+  <!-- Sidebar (rendered by script.js) -->
+  <aside id="sidebar" class="sidebar" aria-label="Primary"></aside>
+
+  <div class="main-wrap">
+    <!-- Topbar (rendered by script.js) -->
+    <header id="topbar" class="topbar"></header>
+
+    <main id="main" tabindex="-1" class="outline-none">
+      <div id="view" class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 xl:px-8 py-6 sm:py-8"></div>
+    </main>
+  </div>
+
+  <!-- Overlay roots -->
+  <div id="modal-root"></div>
+  <div id="dropdown-root"></div>
+  <div id="toast-root" role="status" aria-live="polite"></div>
+
+  <noscript>
+    <div style="padding:40px;font-family:Inter,sans-serif">RexEngine demo requires JavaScript to run.</div>
+  </noscript>
+</body>
+</html>
