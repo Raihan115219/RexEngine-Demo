@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>RexEngine — AI Social Media for Real Estate</title>
+  <meta name="description" content="RexEngine turns property listings into approved, scheduled social media posts for Instagram, Facebook, LinkedIn, X and YouTube.">
+  <meta name="theme-color" content="#EAF0F5">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%233B35D6'/%3E%3Cpath d='M8 15.5 16 9l8 6.5' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12.5 24v-7h4.3a2.6 2.6 0 0 1 0 5.2H12.5M16.6 22.2 19.5 24' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="landing.css?v=6">
+  <script>document.documentElement.classList.replace('no-js', 'js');</script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js" defer></script>
+  <script src="landing.js?v=2" defer></script>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+
+  <!-- Ambient background -->
+  <div class="ambient" aria-hidden="true">
+    <span class="amb amb-1"></span><span class="amb amb-2"></span><span class="amb amb-3"></span>
+  </div>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav-wrap">
+    <nav class="nav glass" aria-label="Main">
+      <a href="#top" class="brand" aria-label="RexEngine home">
+        <span class="logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none"><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse"><stop stop-color="#5B55E6"/><stop offset="1" stop-color="#2E28B0"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#lg)"/><path d="M8 15.5 16 9l8 6.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 24v-7h4.3a2.6 2.6 0 0 1 0 5.2H12.5M16.6 22.2 19.5 24" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="brand-name">Rex<span class="tint">Engine</span></span>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#workflow">Workflow</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#platforms">Platforms</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li class="nav-links-cta"><a href="index.html" class="btn btn-primary btn-sm">Start free <i data-lucide="arrow-right"></i></a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="index.html" class="nav-login">Log in</a>
+        <a href="index.html" class="btn btn-primary btn-sm">Start free <i data-lucide="arrow-right"></i></a>
+        <button class="icon-btn nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links"><i data-lucide="menu"></i></button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" tabindex="-1">
+
+    <!-- ============ HERO (dashboard-style frame) ============ -->
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero-frame">
+
+        <div class="hero-grid">
+
+          <!-- LEFT: headline + stats -->
+          <div class="hero-left">
+            <h1 id="hero-title" class="hero-title">
+              <span class="mask"><span style="--d:1.0s">Listings to</span></span>
+              <span class="mask"><span class="tint" style="--d:1.12s">Live Posts</span></span>
+            </h1>
+            <p class="hero-sub in-blur" style="--d:1.28s">AI social media for real estate. You just approve.</p>
+
+            <div class="hero-stat in-blur" style="--d:1.38s">
+              <span class="label">From one listing URL</span>
+              <span class="big mask"><span style="--d:1.42s"><b data-count="5">5</b> platforms</span></span>
+              <span class="row"><span class="delta up"><i data-lucide="zap"></i> Drafts in minutes</span><span class="muted">no copywriter needed</span></span>
+            </div>
+
+            <div class="hero-cta in-blur" style="--d:1.5s">
+              <a href="index.html" class="btn btn-primary">Start free <i data-lucide="arrow-right"></i></a>
+              <a href="#workflow" class="btn btn-ghost"><i data-lucide="play"></i> How it works</a>
+            </div>
+
+          </div>
+
+          <!-- CENTER: orb -->
+          <div class="hero-center">
+            <div class="orb-wrap">
+              <div class="orb-halo" aria-hidden="true"></div>
+              <svg class="orbits" viewBox="0 0 500 500" aria-hidden="true">
+                <defs>
+                  <path id="orbitA" d="M 30 290 A 225 86 -14 1 1 470 210 A 225 86 -14 1 1 30 290"/>
+                  <path id="orbitB" d="M 60 160 A 205 70 22 1 1 440 340 A 205 70 22 1 1 60 160"/>
+                </defs>
+                <use href="#orbitA" class="orbit-line"/>
+                <use href="#orbitB" class="orbit-line o2"/>
+                <circle r="4.5" class="orbit-dot"><animateMotion dur="9s" repeatCount="indefinite" rotate="auto"><mpath href="#orbitA"/></animateMotion></circle>
+                <circle r="3.5" class="orbit-dot d2"><animateMotion dur="12s" begin="-4s" repeatCount="indefinite"><mpath href="#orbitB"/></animateMotion></circle>
+                <circle r="3" class="orbit-dot d3"><animateMotion dur="9s" begin="-5s" repeatCount="indefinite"><mpath href="#orbitA"/></animateMotion></circle>
+              </svg>
+              <div class="orb-float">
+                <div class="orb" role="img" aria-label="Modern waterfront home turned into social posts">
+                  <span class="orb-img"></span>
+                  <span class="orb-shade"></span>
+                  <span class="orb-gloss"></span>
+                </div>
+              </div>
+
+              <!-- Floating platform chips with pins -->
+              <div class="chip-pin c-ig" style="--d:2.3s">
+                <div class="chip glass"><span class="pi pi-instagram" data-glyph="instagram"></span><span><small>Instagram</small><b>Reel script</b></span></div>
+                <span class="pin p-ig"></span>
+              </div>
+              <div class="chip-pin c-li" style="--d:2.45s">
+                <div class="chip glass"><span class="pi pi-linkedin" data-glyph="linkedin"></span><span><small>LinkedIn</small><b>Investor post</b></span></div>
+                <span class="pin p-li"></span>
+              </div>
+              <div class="chip-pin c-yt" style="--d:2.6s">
+                <div class="chip glass"><span class="pi pi-youtube" data-glyph="youtube"></span><span><small>YouTube</small><b>Shorts</b></span></div>
+                <span class="pin p-yt"></span>
+              </div>
+              <div class="chip-pin c-fb pin-top" style="--d:2.75s">
+                <span class="pin p-fb"></span>
+                <div class="chip glass"><span class="pi pi-facebook" data-glyph="facebook"></span><span><small>Facebook</small><b>Listing post</b></span></div>
+              </div>
+              <div class="chip-pin c-x pin-top" style="--d:2.9s">
+                <span class="pin p-x"></span>
+                <div class="chip glass"><span class="pi pi-x" data-glyph="x"></span><span><small>X</small><b>Thread</b></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: sample output + platform formats -->
+          <div class="hero-right">
+            <div class="hero-tools in-blur" style="--d:1.2s">
+              <span class="pill-btn"><i data-lucide="shield-check"></i> Official APIs · OAuth 2.0</span>
+            </div>
+
+            <div class="card sample-card in-blur" style="--d:1.7s">
+              <div class="card-head">
+                <span class="card-title">Sample AI post</span>
+                <span class="select"><span class="pi pi-xs pi-instagram" data-glyph="instagram"></span> Carousel</span>
+              </div>
+              <div class="sample-body">
+                <div class="sample-media" aria-hidden="true">
+                  <span style="--img:url(https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&amp;fit=crop&amp;w=300&amp;h=300&amp;q=70)"></span>
+                  <span style="--img:url(https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&amp;fit=crop&amp;w=300&amp;h=300&amp;q=70)"></span>
+                  <span style="--img:url(https://images.unsplash.com/photo-1613545325278-f24b0cae1224?auto=format&amp;fit=crop&amp;w=300&amp;h=300&amp;q=70)"></span>
+                </div>
+                <p class="sample-text">Golden hour on the water. This 4-bed Bayview home has floor-to-ceiling glass, an infinity pool and a private dock. Swipe for the view →</p>
+                <p class="sample-tags">#WaterfrontLiving #JustListed #DreamHome</p>
+                <div class="sample-foot">
+                  <span class="ai-chip"><i data-lucide="sparkles"></i> Written by AI</span>
+                  <span class="va-btn on sm"><i data-lucide="check"></i> Approve</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM ROW: the 4-step promise -->
+          <div class="hero-bottom">
+            <a href="#workflow" class="card kpi step-card in-blur" style="--d:2.0s">
+              <span class="kpi-head"><span class="step-no">1</span><i data-lucide="link-2" class="ic-blue"></i> Import</span>
+              <span class="val">Paste a URL</span>
+              <span class="kpi-vis vis-url" aria-hidden="true"><span class="vu-bar"><i data-lucide="globe"></i><span>listing-url.com/4821-bayview</span></span><span class="vu-ok"><i data-lucide="check"></i></span></span>
+              <span class="row"><span class="muted xs">Price, specs, photos &amp; floor plans pulled in for you</span></span>
+            </a>
+            <a href="#features" class="card kpi step-card in-blur" style="--d:2.1s">
+              <span class="kpi-head"><span class="step-no">2</span><i data-lucide="sparkles" class="ic-violet"></i> Generate</span>
+              <span class="val">5 platforms</span>
+              <span class="kpi-vis vis-plats" aria-hidden="true">
+                <span class="pi pi-sm pi-instagram" data-glyph="instagram"></span><span class="pi pi-sm pi-facebook" data-glyph="facebook"></span><span class="pi pi-sm pi-linkedin" data-glyph="linkedin"></span><span class="pi pi-sm pi-x" data-glyph="x"></span><span class="pi pi-sm pi-youtube" data-glyph="youtube"></span>
+              </span>
+              <span class="row"><span class="muted xs">Captions, hashtags &amp; CTAs written for each network</span></span>
+            </a>
+            <a href="#features" class="card kpi step-card in-blur" style="--d:2.2s">
+              <span class="kpi-head"><span class="step-no">3</span><i data-lucide="badge-check" class="ic-orange"></i> Approve</span>
+              <span class="val">You decide</span>
+              <span class="kpi-vis vis-approve" aria-hidden="true"><span class="va-btn ghost"><i data-lucide="pencil"></i> Edit</span><span class="va-btn on"><i data-lucide="check"></i> Approve</span></span>
+              <span class="row"><span class="muted xs">Nothing goes live without your OK</span></span>
+            </a>
+            <a href="#platforms" class="card kpi step-card in-blur" style="--d:2.3s">
+              <span class="kpi-head"><span class="step-no">4</span><i data-lucide="send" class="ic-green"></i> Publish</span>
+              <span class="val">On schedule</span>
+              <span class="kpi-vis vis-week" aria-hidden="true"><span><i class="ig"></i></span><span><i class="li"></i><i class="x"></i></span><span class="on"><i class="ig"></i><i class="fb"></i></span><span><i class="yt"></i></span><span><i class="ig"></i><i class="li"></i></span><span><i class="fb"></i></span><span></span></span>
+              <span class="row"><span class="muted xs">Posted through official APIs, on your calendar</span></span>
+            </a>
+            <a href="index.html" class="card promo in-blur" style="--d:2.4s">
+              <span class="promo-text">
+                <b>Your Next Listing, Live in Minutes</b>
+                <span>Paste a URL, review the drafts, approve. Done.</span>
+                <span class="btn btn-primary btn-xs">Start free <i data-lucide="arrow-right"></i></span>
+              </span>
+              <span class="promo-img" aria-hidden="true"></span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WORKFLOW ============ -->
+    <section class="section" id="workflow" aria-labelledby="wf-title">
+      <header class="sec-head" data-reveal>
+        <span class="eyebrow"><i data-lucide="workflow"></i> How it works</span>
+        <h2 id="wf-title">From Listing to <span class="tint">Live Feed</span></h2>
+        <p>Four steps. Three of them are automatic. The one that isn't is you saying yes.</p>
+      </header>
+      <ol class="steps">
+        <li class="card step" data-reveal style="--i:0">
+          <span class="step-n">01</span>
+          <span class="tile t-blue lg"><i data-lucide="link-2"></i></span>
+          <h3>Import</h3>
+          <p>Paste a listing URL and RexEngine pulls price, location, specs, photos and floor plans. Off-market? Use the manual form.</p>
+        </li>
+        <li class="card step" data-reveal style="--i:1">
+          <span class="step-n">02</span>
+          <span class="tile t-green lg"><i data-lucide="sparkles"></i></span>
+          <h3>Generate</h3>
+          <p>Multimodal AI writes captions, descriptions, hashtags and CTAs tuned for each platform, plus creative suggestions.</p>
+        </li>
+        <li class="card step" data-reveal style="--i:2">
+          <span class="step-n">03</span>
+          <span class="tile t-orange lg"><i data-lucide="badge-check"></i></span>
+          <h3>Review &amp; approve</h3>
+          <p>Preview every post, edit copy, swap images and pick a date. Nothing goes out without your approval.</p>
+        </li>
+        <li class="card step" data-reveal style="--i:3">
+          <span class="step-n">04</span>
+          <span class="tile t-violet lg"><i data-lucide="send"></i></span>
+          <h3>Publish</h3>
+          <p>Approved posts publish through official APIs, right away or on schedule, to all your connected accounts.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ============ FEATURES (bento) ============ -->
+    <section class="section" id="features" aria-labelledby="ft-title">
+      <header class="sec-head" data-reveal>
+        <span class="eyebrow"><i data-lucide="layout-grid"></i> Features</span>
+        <h2 id="ft-title">Everything a Listing <span class="tint">Needs to Sell</span></h2>
+        <p>Data, copy, creatives and publishing in one workspace, built for how real estate teams actually work.</p>
+      </header>
+
+      <div class="bento">
+        <!-- Import -->
+        <article class="card feat span-2" data-reveal style="--i:0">
+          <div class="feat-copy">
+            <span class="tile t-blue"><i data-lucide="download"></i></span>
+            <h3>Property data ingestion</h3>
+            <p>URL import extracts details, pricing, location, specs, images and floor plans automatically. Manual entry covers unpublished and off-market listings.</p>
+          </div>
+          <div class="mock mock-import" aria-hidden="true">
+            <div class="url-bar"><i data-lucide="globe"></i><span class="url-text">listings.example.com/4821-bayview-drive</span><span class="btn btn-primary btn-xs">Import</span></div>
+            <div class="extract">
+              <span class="ex" style="--k:0"><i data-lucide="tag"></i> $2,450,000</span>
+              <span class="ex" style="--k:1"><i data-lucide="map-pin"></i> Bayview, FL</span>
+              <span class="ex" style="--k:2"><i data-lucide="bed-double"></i> 4 bd</span>
+              <span class="ex" style="--k:3"><i data-lucide="bath"></i> 3.5 ba</span>
+              <span class="ex" style="--k:4"><i data-lucide="ruler"></i> 3,120 sq ft</span>
+              <span class="ex" style="--k:5"><i data-lucide="images"></i> 18 photos</span>
+              <span class="ex" style="--k:6"><i data-lucide="layout-panel-top"></i> Floor plan</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Approval -->
+        <article class="card feat" data-reveal style="--i:1">
+          <div class="feat-copy">
+            <span class="tile t-orange"><i data-lucide="badge-check"></i></span>
+            <h3>Review &amp; approval</h3>
+            <p>One dashboard to preview, edit, reschedule and approve.</p>
+          </div>
+          <div class="mock mock-approve" aria-hidden="true">
+            <div class="ap-row"><span class="ap-thumb" style="--img:url('https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=160&h=160&q=70')"></span><span class="ap-meta"><b>Villa &amp; pool carousel</b><small><span class="pi pi-xs pi-instagram" data-glyph="instagram"></span> Thu, 10:30 AM</small></span></div>
+            <div class="ap-actions"><span class="btn btn-ghost btn-xs"><i data-lucide="pencil"></i> Edit</span><span class="btn btn-primary btn-xs ap-approve"><i data-lucide="check"></i> Approve</span></div>
+          </div>
+        </article>
+
+        <!-- Accounts -->
+        <article class="card feat" data-reveal style="--i:2">
+          <div class="feat-copy">
+            <span class="tile t-violet"><i data-lucide="plug-zap"></i></span>
+            <h3>Social account connections</h3>
+            <p>Connect with OAuth. We never see your passwords.</p>
+          </div>
+          <ul class="mock acct-list" aria-hidden="true">
+            <li><span class="pi pi-sm pi-instagram" data-glyph="instagram"></span> Instagram <span class="ok">Connected</span></li>
+            <li><span class="pi pi-sm pi-facebook" data-glyph="facebook"></span> Facebook <span class="ok">Connected</span></li>
+            <li><span class="pi pi-sm pi-linkedin" data-glyph="linkedin"></span> LinkedIn <span class="ok">Connected</span></li>
+            <li><span class="pi pi-sm pi-youtube" data-glyph="youtube"></span> YouTube <span class="add">Connect</span></li>
+          </ul>
+        </article>
+
+        <!-- AI content -->
+        <article class="card feat span-2" data-reveal style="--i:3">
+          <div class="feat-copy">
+            <span class="tile t-green"><i data-lucide="sparkles"></i></span>
+            <h3>AI content generation</h3>
+            <p>Platform-specific captions, descriptions, hashtags and CTAs, written in seconds and tuned to each network's format and limits.</p>
+          </div>
+          <div class="mock mock-ai">
+            <div class="ai-tabs" role="tablist" aria-label="Sample content by platform">
+              <button role="tab" aria-selected="true" data-p="instagram"><span class="pi pi-xs pi-instagram" data-glyph="instagram"></span> Instagram</button>
+              <button role="tab" aria-selected="false" data-p="facebook"><span class="pi pi-xs pi-facebook" data-glyph="facebook"></span> Facebook</button>
+              <button role="tab" aria-selected="false" data-p="linkedin"><span class="pi pi-xs pi-linkedin" data-glyph="linkedin"></span> LinkedIn</button>
+              <button role="tab" aria-selected="false" data-p="x"><span class="pi pi-xs pi-x" data-glyph="x"></span> X</button>
+              <button role="tab" aria-selected="false" data-p="youtube"><span class="pi pi-xs pi-youtube" data-glyph="youtube"></span> YouTube</button>
+            </div>
+            <div class="ai-out" role="tabpanel" aria-live="polite">
+              <span class="ai-badge"><i data-lucide="sparkles"></i> <span id="ai-format">Carousel caption</span></span>
+              <p id="ai-text"></p>
+              <p class="ai-tags" id="ai-tags"></p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Media -->
+        <article class="card feat span-2" data-reveal style="--i:4">
+          <div class="feat-copy">
+            <span class="tile t-blue"><i data-lucide="cloud"></i></span>
+            <h3>Media &amp; asset management</h3>
+            <p>Original photos, floor plans and AI-generated creatives live in cloud storage, ready to edit, reuse and publish.</p>
+          </div>
+          <div class="mock media-grid" aria-hidden="true">
+            <span style="--img:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=300&h=220&q=70')"></span>
+            <span style="--img:url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=300&h=220&q=70')"></span>
+            <span style="--img:url('https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=300&h=220&q=70')"></span>
+            <span style="--img:url('https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=300&h=220&q=70')"></span>
+            <span style="--img:url('https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=300&h=220&q=70')"></span>
+            <span class="media-ai" style="--img:url('https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=300&h=220&q=70')"><em><i data-lucide="sparkles"></i> AI creative</em></span>
+          </div>
+        </article>
+
+        <!-- Scheduler -->
+        <article class="card feat" data-reveal style="--i:5">
+          <div class="feat-copy">
+            <span class="tile t-orange"><i data-lucide="calendar-days"></i></span>
+            <h3>Scheduled publishing</h3>
+            <p>Queue approved posts and let the scheduler handle the rest.</p>
+          </div>
+          <div class="mock week" aria-hidden="true">
+            <span><small>Mon</small><i class="dot ig"></i></span>
+            <span><small>Tue</small><i class="dot li"></i><i class="dot x"></i></span>
+            <span class="today"><small>Wed</small><i class="dot ig"></i><i class="dot fb"></i></span>
+            <span><small>Thu</small><i class="dot yt"></i></span>
+            <span><small>Fri</small><i class="dot ig"></i><i class="dot li"></i><i class="dot x"></i></span>
+            <span><small>Sat</small><i class="dot fb"></i></span>
+            <span><small>Sun</small></span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ PLATFORMS ============ -->
+    <section class="section" id="platforms" aria-labelledby="pl-title">
+      <header class="sec-head" data-reveal>
+        <span class="eyebrow"><i data-lucide="share-2"></i> Platforms</span>
+        <h2 id="pl-title">Five Networks, <span class="tint">One Approval</span></h2>
+        <p>Each platform gets content written for its audience, not one caption copied five times.</p>
+      </header>
+      <div class="plat-grid">
+        <article class="card plat" data-reveal style="--i:0">
+          <span class="pi pi-lg pi-instagram" data-glyph="instagram"></span>
+          <h3>Instagram</h3>
+          <ul><li>Feed posts</li><li>Carousels</li><li>Reels scripts</li></ul>
+        </article>
+        <article class="card plat" data-reveal style="--i:1">
+          <span class="pi pi-lg pi-facebook" data-glyph="facebook"></span>
+          <h3>Facebook</h3>
+          <ul><li>Property descriptions</li><li>Promotional posts</li><li>Open-house updates</li></ul>
+        </article>
+        <article class="card plat" data-reveal style="--i:2">
+          <span class="pi pi-lg pi-linkedin" data-glyph="linkedin"></span>
+          <h3>LinkedIn</h3>
+          <ul><li>Investment angles</li><li>B2B &amp; developer content</li><li>Market insights</li></ul>
+        </article>
+        <article class="card plat" data-reveal style="--i:3">
+          <span class="pi pi-lg pi-x" data-glyph="x"></span>
+          <h3>X</h3>
+          <ul><li>Short promo posts</li><li>Threads</li><li>Price-drop alerts</li></ul>
+        </article>
+        <article class="card plat" data-reveal style="--i:4">
+          <span class="pi pi-lg pi-youtube" data-glyph="youtube"></span>
+          <h3>YouTube</h3>
+          <ul><li>Shorts scripts</li><li>Descriptions</li><li>Tags</li></ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ AUDIENCE + INTEGRATIONS ============ -->
+    <section class="section split" aria-labelledby="au-title">
+      <div class="card audience" data-reveal style="--i:0">
+        <span class="eyebrow"><i data-lucide="users"></i> Built for</span>
+        <h2 id="au-title">Real Estate <span class="tint">Teams of Any Size</span></h2>
+        <ul class="aud-list">
+          <li><span class="tile t-blue"><i data-lucide="user-round"></i></span><span><b>Individual brokers</b><small>Post every listing without hiring a social media manager.</small></span></li>
+          <li><span class="tile t-green"><i data-lucide="building"></i></span><span><b>Agencies</b><small>Keep every agent's listings on brand across all accounts.</small></span></li>
+          <li><span class="tile t-orange"><i data-lucide="hard-hat"></i></span><span><b>Property developers</b><small>Market launches and phases with investor-ready content.</small></span></li>
+          <li><span class="tile t-violet"><i data-lucide="hammer"></i></span><span><b>Builders</b><small>Show progress and inventory on a steady schedule.</small></span></li>
+        </ul>
+      </div>
+      <div class="card integr" data-reveal style="--i:1">
+        <span class="eyebrow"><i data-lucide="shield-check"></i> Integrations</span>
+        <h2>Official APIs. <span class="tint">Secure by Design.</span></h2>
+        <p>RexEngine connects through each network's official API with OAuth 2.0, and stores media in enterprise cloud storage.</p>
+        <div class="api-chips">
+          <span class="api"><span class="pi pi-xs pi-instagram" data-glyph="instagram"></span> Meta Graph API</span>
+          <span class="api"><span class="pi pi-xs pi-linkedin" data-glyph="linkedin"></span> LinkedIn API</span>
+          <span class="api"><span class="pi pi-xs pi-x" data-glyph="x"></span> X API</span>
+          <span class="api"><span class="pi pi-xs pi-youtube" data-glyph="youtube"></span> YouTube Data API</span>
+          <span class="api"><i data-lucide="key-round"></i> OAuth 2.0</span>
+          <span class="api"><i data-lucide="database"></i> AWS S3 / Cloudflare R2</span>
+          <span class="api"><i data-lucide="alarm-clock"></i> Scheduled publishing</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="section faq-sec" id="faq" aria-labelledby="faq-title">
+      <header class="sec-head" data-reveal>
+        <span class="eyebrow"><i data-lucide="message-circle-question"></i> FAQ</span>
+        <h2 id="faq-title">Questions, <span class="tint">Answered</span></h2>
+      </header>
+      <div class="faq">
+        <details class="card" data-reveal style="--i:0" open>
+          <summary>Does anything get posted without my approval?<i data-lucide="plus"></i></summary>
+          <p>No. Every generated post lands in your approval queue first. You can edit it, change the image or time, then approve it to publish or schedule.</p>
+        </details>
+        <details class="card" data-reveal style="--i:1">
+          <summary>What if my listing isn't online yet?<i data-lucide="plus"></i></summary>
+          <p>Use manual entry. Fill in the structured form and upload photos for unpublished or off-market properties. Content generation works the same way.</p>
+        </details>
+        <details class="card" data-reveal style="--i:2">
+          <summary>Which social networks are supported?<i data-lucide="plus"></i></summary>
+          <p>Instagram, Facebook, LinkedIn, X and YouTube at launch, each with its own formats: posts, carousels, Reels and Shorts scripts, threads and more.</p>
+        </details>
+        <details class="card" data-reveal style="--i:3">
+          <summary>How do you connect to my accounts?<i data-lucide="plus"></i></summary>
+          <p>Through OAuth on each platform's official API (Meta Graph, LinkedIn, X and YouTube Data). You sign in with the platform directly; RexEngine never sees your password.</p>
+        </details>
+        <details class="card" data-reveal style="--i:4">
+          <summary>Where are my photos and creatives stored?<i data-lucide="plus"></i></summary>
+          <p>In secure cloud storage (AWS S3 or Cloudflare R2). Originals, floor plans and AI-generated assets stay available for editing, regenerating and publishing.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ FINAL CTA ============ -->
+    <section class="section" aria-labelledby="cta-title">
+      <div class="card cta-band" data-reveal>
+        <div class="cta-copy">
+          <h2 id="cta-title">Your Listings Deserve <span class="tint">a Feed That Sells</span></h2>
+          <p>Import a property, see five platforms of drafts, and approve your first post today.</p>
+          <div class="hero-cta">
+            <a href="index.html" class="btn btn-primary">Start free <i data-lucide="arrow-right"></i></a>
+            <a href="index.html" class="btn btn-ghost">Open the live demo</a>
+          </div>
+        </div>
+        <div class="cta-img" aria-hidden="true"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a href="#top" class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="9" fill="url(#lg)"/><path d="M8 15.5 16 9l8 6.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 24v-7h4.3a2.6 2.6 0 0 1 0 5.2H12.5M16.6 22.2 19.5 24" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="brand-name">Rex<span class="tint">Engine</span></span></a>
+    <nav aria-label="Footer"><a href="#workflow">Workflow</a><a href="#features">Features</a><a href="#platforms">Platforms</a><a href="#faq">FAQ</a></nav>
+    <small>© 2026 RexEngine. Sample data shown.</small>
+  </footer>
+</body>
+</html>

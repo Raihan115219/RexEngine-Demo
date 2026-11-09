@@ -592,10 +592,11 @@ function openDropdown(anchor, html, { align = 'right', width, focus = true, cls 
 function positionDropdown(el, anchor, align) {
   const r = anchor.getBoundingClientRect();
   const w = el.offsetWidth, h = el.offsetHeight;
-  let left = align === 'right' ? r.right - w : r.left;
+  let left = align === 'right' ? r.right - w : align === 'side' ? (anchor.closest('#sidebar') || anchor).getBoundingClientRect().right + 10 : r.left;
   left = clamp(left, 12, window.innerWidth - w - 12);
   let top = r.bottom + 6;
-  if (top + h > window.innerHeight - 12 && r.top - h - 6 > 12) top = r.top - h - 6;
+  if (align === 'side') top = clamp(r.top - 8, 12, window.innerHeight - h - 12);
+  else if (top + h > window.innerHeight - 12 && r.top - h - 6 > 12) top = r.top - h - 6;
   el.style.left = left + 'px'; el.style.top = top + 'px';
   el.style.transformOrigin = `${align === 'right' ? 'right' : 'left'} ${top < r.top ? 'bottom' : 'top'}`;
 }
@@ -662,7 +663,7 @@ const pageHeader = ({ title, subtitle, actions = '', eyebrow = '' }) => `
   <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-6 sm:mb-8">
     <div class="min-w-0">
       ${eyebrow}
-      <h1 class="text-[26px] sm:text-[30px] leading-tight font-bold tracking-[-0.025em] text-ink">${title}</h1>
+      <h1 class="page-title text-[28px] sm:text-[34px] leading-[1.1] font-semibold tracking-[-0.03em] text-ink">${/[<]/.test(title) || !/\s/.test(title.trim()) ? title : title.replace(/(\S+)$/, '<span class="tint">$1</span>')}</h1>
       ${subtitle ? `<p class="mt-1.5 text-[15px] text-sub">${subtitle}</p>` : ''}
     </div>
     ${actions ? `<div class="flex flex-wrap items-center gap-2.5">${actions}</div>` : ''}
@@ -695,59 +696,51 @@ function renderSidebar() {
   const left = state.credits.total - state.credits.used;
   const pct = Math.round((state.credits.used / state.credits.total) * 100);
   const navLink = ([r, label, icon]) => `
-    <a href="#/${r}" class="nav-item ${state.route === r ? 'active' : ''}" ${state.route === r ? 'aria-current="page"' : ''} title="${label}">
+    <a href="#/${r}" class="nav-item ${state.route === r ? 'active' : ''}" ${state.route === r ? 'aria-current="page"' : ''} aria-label="${label}" data-tip="${label}${r === 'approvals' && pending ? ` · ${pending} pending` : ''}">
       <span class="nav-ic">${ic(icon)}</span><span class="sb-hide truncate">${label}</span>
       ${r === 'approvals' && pending ? `<span class="nav-badge">${pending}</span>` : ''}
-      ${r === 'studio' ? `<span class="sb-hide ml-auto text-[10px] font-bold tracking-wide text-brand-700 bg-brand-50 border border-brand-100 rounded-md px-1.5 py-0.5">AI</span>` : ''}
+      ${r === 'studio' ? '<span class="sb-hide nav-ai">AI</span>' : ''}
     </a>`;
+  const ring = 2 * Math.PI * 15;
   $('#sidebar').innerHTML = `
-    <div class="sb-brand flex items-center gap-3 h-[72px] mx-4 border-b border-line flex-none">
-      <a href="#/overview" class="flex items-center gap-3 min-w-0" aria-label="RexEngine home">
-        ${LOGO(36)}
+    <div class="sb-brand">
+      <a href="#/overview" class="flex items-center gap-3 min-w-0" aria-label="RexEngine home" data-tip="RexEngine">
+        <span class="sb-logo">${LOGO(42)}</span>
         <div class="sb-hide min-w-0">
-          <div class="text-ink font-bold text-[16px] tracking-tight leading-tight">RexEngine.</div>
+          <div class="text-ink font-semibold text-[17px] tracking-tight leading-tight">Rex<span class="tint">Engine</span></div>
           <div class="text-[12px] text-sub leading-tight mt-0.5">AI Real Estate Marketing</div>
         </div>
       </a>
-      <button class="sb-collapse hidden lg:grid ml-auto w-8 h-8 flex-none rounded-full border border-line bg-white text-sub hover:text-ink hover:border-[#DDDDE3] place-content-center transition-colors" data-action="toggle-rail" aria-label="Toggle sidebar" title="Collapse / expand sidebar">${ic('chevrons-left', 'w-4 h-4')}</button>
-      <button class="lg:hidden icon-btn -mr-2 ml-auto" data-action="close-drawer" aria-label="Close menu">${ic('x')}</button>
+      <button class="sb-close icon-btn ml-auto -mr-1" data-action="close-drawer" aria-label="Close menu">${ic('x')}</button>
     </div>
 
-    <div class="sb-hide px-4 pt-4 flex-none">
-      <div class="relative">
-        <div class="input-icon">${ic('search')}
-          <input id="global-search" class="input !h-10 !rounded-[11px] !pr-14 text-[13.5px]" placeholder="Search..." autocomplete="off" aria-label="Search" role="combobox" aria-expanded="false" aria-controls="search-results">
-        </div>
-        <span class="kbd absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">${isMac ? '⌘' : 'Ctrl'} K</span>
-      </div>
-    </div>
-
-    <nav class="flex-1 overflow-y-auto thin-scroll px-3 pt-5 pb-4" aria-label="Main navigation">
-      <div class="sb-section-label sb-hide">Menu</div>
-      <div class="space-y-1">${NAV[0].items.map(navLink).join('')}</div>
-      <div class="sb-section-label sb-hide mt-6">Help & Settings</div>
-      <div class="space-y-1">
-        ${NAV[1].items.map(navLink).join('')}
-        <button class="nav-item w-full" data-action="help-menu" title="Help & Support" aria-haspopup="menu" aria-expanded="false"><span class="nav-ic">${ic('circle-help')}</span><span class="sb-hide">Help & Support</span></button>
-      </div>
+    <nav class="sb-nav thin-scroll" aria-label="Main navigation">
+      ${NAV[0].items.map(navLink).join('')}
+      <div class="sb-sep" role="separator"></div>
+      ${NAV[1].items.map(navLink).join('')}
+      <button class="nav-item" data-action="help-menu" data-tip="Help & Support" aria-label="Help & Support" aria-haspopup="menu" aria-expanded="false"><span class="nav-ic">${ic('circle-help')}</span><span class="sb-hide">Help & Support</span></button>
     </nav>
 
-    <div class="flex-none px-4 pb-4">
-      <div class="sb-hide rounded-[12px] border border-line bg-white p-3.5 mb-3 shadow-card">
+    <div class="sb-foot">
+      <div class="sb-hide sb-credits">
         <div class="flex items-center justify-between text-[12.5px]">
-          <span class="font-semibold text-ink flex items-center gap-1.5">${ic('zap', 'w-3.5 h-3.5 text-brand-600')}AI credits</span>
+          <span class="font-medium text-ink flex items-center gap-1.5">${ic('zap', 'w-3.5 h-3.5 text-brand-600')}AI credits</span>
           <span class="text-sub tnum">${num(left)} left</span>
         </div>
         <div class="usage-bar mt-2.5" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="AI credits used"><i style="width:${pct}%"></i></div>
         <div class="mt-2.5 flex items-center justify-between text-[11.5px]">
           <span class="text-muted tnum">${num(state.credits.used)} / ${num(state.credits.total)} used</span>
-          <button class="text-brand-600 font-semibold hover:text-brand-700" data-action="upgrade">Upgrade</button>
+          <button class="text-brand-600 font-medium hover:text-brand-700" data-action="upgrade">Upgrade</button>
         </div>
       </div>
-      <button class="sb-user w-full flex items-center gap-3 border-t border-line pt-3.5 text-left group" data-action="user-menu" aria-haspopup="menu" aria-expanded="false" title="Alex Morgan">
-        ${avatar(AV.alex, 36)}
+      <button class="sb-credit-ring" data-action="upgrade" data-tip="${num(left)} AI credits left" aria-label="AI credits: ${num(left)} left">
+        <svg class="cr-ring" viewBox="0 0 36 36" aria-hidden="true"><circle class="bg" cx="18" cy="18" r="15"/><circle class="fg" cx="18" cy="18" r="15" stroke-dasharray="${((100 - pct) / 100 * ring).toFixed(1)} ${ring.toFixed(1)}"/></svg>
+        ${ic('zap', 'w-4 h-4')}
+      </button>
+      <button class="sb-user group" data-action="user-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu" data-tip="Alex Morgan">
+        ${avatar(AV.alex, 38)}
         <div class="sb-hide min-w-0 flex-1">
-          <div class="text-[13.5px] font-semibold text-ink truncate">Alex Morgan</div>
+          <div class="text-[13.5px] font-medium text-ink truncate">Alex Morgan</div>
           <div class="text-[12px] text-sub truncate">Admin · Morgan & Co.</div>
         </div>
         <span class="sb-hide text-sub group-hover:text-ink transition-colors">${ic('chevron-right')}</span>
@@ -758,21 +751,24 @@ function renderSidebar() {
 function renderTopbar() {
   const unread = state.notifications.some(n => n.unread);
   $('#topbar').innerHTML = `
-    <div class="h-full flex items-center gap-2 sm:gap-3 px-4 sm:px-6 xl:px-8">
+    <div class="topbar-inner">
       <button class="icon-btn lg:hidden -ml-2" data-action="open-drawer" aria-label="Open navigation menu">${ic('menu', 'w-5 h-5')}</button>
-      <a href="#/overview" class="md:hidden flex items-center gap-2" aria-label="RexEngine home">${LOGO(28)}<span class="font-bold text-[15px] tracking-tight">RexEngine.</span></a>
-      <nav aria-label="Breadcrumb" class="hidden md:flex items-center gap-2 text-[13.5px] min-w-0 flex-none">
-        <span class="text-sub whitespace-nowrap">Morgan & Co. Realty</span>
-        ${ic('chevron-right', 'w-3.5 h-3.5 text-muted flex-none')}
-        <span id="crumb" class="font-semibold text-ink whitespace-nowrap" aria-current="page">${ROUTE_TITLES[state.route]}</span>
-      </nav>
+      <a href="#/overview" class="md:hidden flex items-center gap-2" aria-label="RexEngine home">${LOGO(30)}<span class="font-semibold text-[15px] tracking-tight">Rex<span class="tint">Engine</span></span></a>
+      <div class="hidden md:block min-w-0">
+        <div class="top-crumb">Morgan & Co. Realty</div>
+        <div id="crumb" class="top-title" aria-current="page">${ROUTE_TITLES[state.route]}</div>
+      </div>
       <div class="flex-1"></div>
-      <button class="icon-btn lg:hidden" data-action="mobile-search" aria-label="Search">${ic('search')}</button>
-      <button class="icon-btn" data-action="notif-menu" aria-label="Notifications${unread ? ' (unread)' : ''}" aria-haspopup="menu" aria-expanded="false">${ic('bell')}${unread ? '<span class="notif-dot"></span>' : ''}</button>
-      <div class="w-px h-6 bg-line mx-1 hidden sm:block"></div>
-      <button class="flex items-center gap-2.5 rounded-xl pl-1 pr-1 sm:pr-2.5 h-10 hover:bg-[#F1F1F4] transition-colors" data-action="user-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">
-        ${avatar(AV.alex, 30)}
-        <span class="hidden sm:block text-left leading-tight"><span class="block text-[13px] font-semibold text-ink">Alex Morgan</span><span class="block text-[11.5px] text-sub">Admin</span></span>
+      <div class="top-search input-icon hidden lg:block">${ic('search')}
+        <input id="global-search" class="input text-[13.5px]" placeholder="Search properties, posts, pages…" autocomplete="off" aria-label="Search" role="combobox" aria-expanded="false" aria-controls="search-results">
+        <span class="kbd">${isMac ? '⌘' : 'Ctrl'} K</span>
+      </div>
+      <span class="pill-btn hidden xl:inline-flex" aria-label="Today">${ic('calendar')}${fmtDate(new Date(), { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+      <button class="round-btn lg:hidden" data-action="mobile-search" aria-label="Search">${ic('search')}</button>
+      <button class="round-btn" data-action="notif-menu" aria-label="Notifications${unread ? ' (unread)' : ''}" aria-haspopup="menu" aria-expanded="false">${ic('bell')}${unread ? '<span class="notif-dot"></span>' : ''}</button>
+      <button class="pill-btn !pl-1 !pr-1 sm:!pr-3.5" data-action="user-menu" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">
+        ${avatar(AV.alex, 34)}
+        <span class="hidden sm:block text-left leading-tight"><span class="block text-[13px] font-medium text-ink">Alex Morgan</span><span class="block text-[11.5px] text-sub font-normal">Admin</span></span>
         <span class="hidden sm:block text-muted">${ic('chevron-down', 'w-4 h-4')}</span>
       </button>
     </div>`;
@@ -894,47 +890,20 @@ function statCard({ icon, tint, value, label, foot, trend, route }) {
     </a>`;
 }
 
+/* Small visual helpers (Overview hero) */
+const sparkBars = (vals, tone) => {
+  const max = Math.max(...vals);
+  return `<div class="spark" data-tone="${tone}" aria-hidden="true">${vals.map((v, k) => `<i style="height:${Math.max(10, (v / max) * 100)}%;--k:${k};opacity:${(0.45 + 0.55 * (k / (vals.length - 1))).toFixed(2)}"></i>`).join('')}</div>`;
+};
+const deltaPill = (text, tone = 'up', icon = tone === 'up' ? 'arrow-up' : tone === 'down' ? 'arrow-down' : 'clock-3') => `<span class="delta ${tone}">${ic(icon, 'w-3 h-3')}${text}</span>`;
+
 function renderOverview() {
   const k = kpis();
   const review = count(c => c.status === 'review');
   const next = state.content.filter(c => c.status === 'scheduled' && c.date > new Date()).sort((a, b) => a.date - b.date)[0];
   const p = getProp('p1');
   return `
-    ${pageHeader({
-      eyebrow: `<p class="text-[13px] font-medium text-brand-700 flex items-center gap-2 mb-1.5">${ic('calendar', 'w-4 h-4')}${fmtDate(new Date(), { weekday: 'long', month: 'long', day: 'numeric' })}</p>`,
-      title: `${greeting()}, Alex`,
-      subtitle: 'Your property marketing, all in one place.',
-      actions: `<button class="btn btn-secondary" data-action="go" data-route="studio">${ic('wand-sparkles')}Create Content</button><button class="btn btn-primary" data-action="add-property">${ic('plus')}Add Property</button>`,
-    })}
-
-    ${state.bannerHidden ? '' : `
-    <section class="relative overflow-hidden rounded-[16px] border border-brand-100 mb-6" style="background:linear-gradient(100deg,#F3F2FE 0%,#FFFFFF 55%,#F7F7FE 100%)">
-      <div class="absolute -right-16 -top-20 w-72 h-72 rounded-full pointer-events-none" style="background:radial-gradient(closest-side, rgba(91,85,230,.16), transparent)"></div>
-      <div class="relative flex flex-col xl:flex-row xl:items-center gap-4 xl:gap-5 px-5 sm:px-6 py-5">
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2 text-[12px] font-bold tracking-wide uppercase text-brand-600">${ic('sparkles', 'w-3.5 h-3.5')}From listing to live in minutes</div>
-          <p class="mt-1.5 text-[16px] sm:text-[17px] font-semibold leading-snug text-ink">RexEngine turns property listings into ready-to-publish social media marketing.</p>
-        </div>
-        <ol class="flex items-center gap-2 sm:gap-3 text-[12.5px] text-slate-600 flex-wrap font-medium" aria-label="How it works">
-          <li class="flex items-center gap-2 rounded-full bg-white border border-line h-9 px-3.5 shadow-card">${ic('link', 'w-4 h-4 text-slate-500')}Listing URL</li>
-          <li aria-hidden="true" class="text-muted">${ic('arrow-right', 'w-4 h-4')}</li>
-          <li class="flex items-center gap-2 rounded-full bg-brand-600 h-9 px-3.5 text-white shadow-[0_4px_12px_-4px_rgba(59,53,214,.6)]">${ic('sparkles', 'w-4 h-4')}AI content</li>
-          <li aria-hidden="true" class="text-muted">${ic('arrow-right', 'w-4 h-4')}</li>
-          <li class="flex items-center gap-1.5 rounded-full bg-white border border-line h-9 px-3 shadow-card">${P_ORDER.map(x => pIcon(x, 'xs')).join('')}</li>
-        </ol>
-        <div class="flex items-center gap-2 flex-none">
-          <button class="btn btn-primary btn-sm" data-action="add-property">${ic('download')}Import a listing</button>
-          <button class="icon-btn !w-8 !h-8" data-action="hide-banner" aria-label="Dismiss banner">${ic('x')}</button>
-        </div>
-      </div>
-    </section>`}
-
-    <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5 stagger">
-      ${statCard({ icon: 'building-2', tint: 'bg-slate-100 text-slate-700', value: k.properties, label: 'Total Properties', foot: `<span>${addedThisMonth()} added this month</span>`, trend: { up: true, text: `+${addedThisMonth()}` }, route: 'properties' })}
-      ${statCard({ icon: 'file-pen-line', tint: 'bg-amber-50 text-amber-600', value: k.drafts, label: 'Content Drafts', foot: `<span><b class="font-semibold text-amber-700">${review}</b> need your review</span>`, route: 'approvals' })}
-      ${statCard({ icon: 'calendar-clock', tint: 'bg-blue-50 text-blue-600', value: k.scheduled, label: 'Scheduled Posts', foot: `<span class="truncate">${next ? `Next: ${relDay(next.date)}, ${fmtTime(next.date)}` : 'Nothing queued'}</span>`, route: 'calendar' })}
-      ${statCard({ icon: 'send', tint: 'bg-emerald-50 text-emerald-600', value: k.published, label: 'Published This Week', foot: '<span>Across 4 channels</span>', trend: { up: true, text: '12%' }, route: 'calendar' })}
-    </div>
+    ${overviewHero(p, k, review, next)}
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mt-5">
       ${featuredCard(p)}
@@ -945,6 +914,183 @@ function renderOverview() {
       ${upcomingCard()}
       ${accountsCard()}
     </div>`;
+}
+
+function overviewHero(p, k, review, next) {
+  const all = state.content;
+  const byP = P_ORDER.map(x => ({ id: x, n: all.filter(c => c.platform === x).length }));
+  const maxP = Math.max(1, ...byP.map(b => b.n));
+  const propItems = all.filter(c => c.propertyId === p.id);
+  const connected = state.accounts.filter(a => a.status === 'connected').length;
+  const chip = (x, pos, d) => {
+    const its = propItems.filter(c => c.platform === x);
+    const st = its.length ? STATUS[its.sort((a, b) => b.generatedAt - a.generatedAt)[0].status].label : 'Not started';
+    const top = pos.includes('pin-top');
+    const pin = `<span class="pin" style="--c:${({ instagram: '#E1306C', facebook: '#1877F2', linkedin: '#0A66C2', x: '#111827', youtube: '#FF0033' })[x]}"></span>`;
+    return `
+      <button class="chip-pin ${pos}" style="--d:${d}s" data-action="studio-open" data-prop="${p.id}" data-platform="${x}" aria-label="${PLATFORMS[x].name}: ${its.length} posts, ${st}. Open in Content Studio">
+        ${top ? pin : ''}
+        <span class="orb-chip">${pIcon(x, 'md')}<span class="min-w-0 text-left"><small>${PLATFORMS[x].name}</small><b>${its.length ? `${its.length} post${its.length > 1 ? 's' : ''}` : 'Generate'}</b></span></span>
+        ${top ? '' : pin}
+      </button>`;
+  };
+  return `
+    <section class="ov-hero" aria-labelledby="ov-title">
+      <div class="ov-grid">
+
+        <div class="ov-left">
+          <p class="ov-date in-blur" style="--d:.15s">${ic('calendar', 'w-4 h-4')}${fmtDate(new Date(), { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+          <h1 id="ov-title" class="ov-title">
+            <span class="mask"><span style="--d:.25s">${greeting()},</span></span>
+            <span class="mask"><span class="tint" style="--d:.36s">Alex</span></span>
+          </h1>
+          <p class="ov-sub in-blur" style="--d:.45s">Your property marketing, all in one place.</p>
+
+          <div class="ov-stat in-blur" style="--d:.55s">
+            <span class="label">Published this week</span>
+            <span class="big tnum"><b data-count="${k.published}">${k.published}</b> <small>posts</small></span>
+            <span class="flex items-center gap-2 flex-wrap">${deltaPill('+12%')}<span class="text-[12.5px] text-sub">vs last week · ${connected} channels live</span></span>
+          </div>
+
+          <div class="flex flex-wrap gap-2.5 in-blur" style="--d:.62s">
+            <button class="btn btn-primary" data-action="add-property">${ic('plus')}Add Property</button>
+            <button class="btn btn-secondary" data-action="go" data-route="studio">${ic('wand-sparkles')}Create Content</button>
+          </div>
+
+          <div class="ov-mini">
+            <a href="#/properties" class="card ov-row in-blur" style="--d:.72s">
+              <span class="stat-icon bg-blue-50 text-blue-600">${ic('building-2')}</span>
+              <span class="min-w-0 flex-1"><span class="block text-[12.5px] text-sub">Total properties</span><span class="block text-[21px] font-semibold tracking-tight tnum leading-tight"><b data-count="${k.properties}" class="font-semibold">${k.properties}</b></span></span>
+              <span class="flex flex-col items-end gap-1">${deltaPill(`+${addedThisMonth()}`)}<span class="text-[11px] text-muted">this month</span></span>
+            </a>
+            <a href="#/approvals" class="card ov-row in-blur" style="--d:.82s">
+              <span class="stat-icon bg-amber-50 text-amber-600">${ic('file-pen-line')}</span>
+              <span class="min-w-0 flex-1"><span class="block text-[12.5px] text-sub">Content drafts</span><span class="block text-[21px] font-semibold tracking-tight tnum leading-tight"><b data-count="${k.drafts}" class="font-semibold">${k.drafts}</b></span></span>
+              <span class="flex flex-col items-end gap-1">${deltaPill(`${review} to review`, 'warn', 'eye')}<span class="text-[11px] text-muted">approvals</span></span>
+            </a>
+            <a href="#/calendar" class="card ov-row in-blur" style="--d:.92s">
+              <span class="stat-icon bg-brand-50 text-brand-600">${ic('calendar-clock')}</span>
+              <span class="min-w-0 flex-1"><span class="block text-[12.5px] text-sub">Scheduled posts</span><span class="block text-[21px] font-semibold tracking-tight tnum leading-tight"><b data-count="${k.scheduled}" class="font-semibold">${k.scheduled}</b></span></span>
+              <span class="flex flex-col items-end gap-1 min-w-0"><span class="text-[11.5px] font-medium text-ink truncate max-w-[110px]">${next ? relDay(next.date) : 'Nothing queued'}</span><span class="text-[11px] text-muted">${next ? fmtTime(next.date) : ''}</span></span>
+            </a>
+          </div>
+        </div>
+
+        <div class="ov-center">
+          <div class="orb-wrap">
+            <div class="orb-halo" aria-hidden="true"></div>
+            <svg class="orbits" viewBox="0 0 500 500" aria-hidden="true">
+              <defs>
+                <path id="ovOrbitA" d="M 30 290 A 225 86 -14 1 1 470 210 A 225 86 -14 1 1 30 290"/>
+                <path id="ovOrbitB" d="M 60 160 A 205 70 22 1 1 440 340 A 205 70 22 1 1 60 160"/>
+              </defs>
+              <use href="#ovOrbitA" class="orbit-line"/><use href="#ovOrbitB" class="orbit-line o2"/>
+              <circle r="4.5" class="orbit-dot"><animateMotion dur="9s" repeatCount="indefinite"><mpath href="#ovOrbitA"/></animateMotion></circle>
+              <circle r="3.5" class="orbit-dot d2"><animateMotion dur="12s" begin="-4s" repeatCount="indefinite"><mpath href="#ovOrbitB"/></animateMotion></circle>
+              <circle r="3" class="orbit-dot d3"><animateMotion dur="9s" begin="-5s" repeatCount="indefinite"><mpath href="#ovOrbitA"/></animateMotion></circle>
+            </svg>
+            <div class="orb-float">
+              <button class="orb" data-action="view-property" data-id="${p.id}" aria-label="View featured property ${p.address}">
+                <span class="orb-img" style="background-image:url('${p.photos[0].src}')"></span>
+                <span class="orb-shade"></span><span class="orb-gloss"></span>
+              </button>
+            </div>
+            ${chip('instagram', 'c-ig', 1.3)}
+            ${chip('linkedin', 'c-li', 1.42)}
+            ${chip('youtube', 'c-yt', 1.54)}
+            ${chip('facebook', 'c-fb pin-top', 1.66)}
+            ${chip('x', 'c-x pin-top', 1.78)}
+          </div>
+          <div class="orb-caption in-blur" style="--d:1.1s">
+            <span class="min-w-0"><span class="block text-[11.5px] text-sub truncate">Featured · ${p.neighborhood}, ${p.city}</span><span class="block text-[14px] font-medium text-ink truncate">${p.address} · <span class="tnum">${money(p.price)}</span></span></span>
+            <button class="btn btn-primary btn-sm flex-none" data-action="studio-open" data-prop="${p.id}">${ic('sparkles')}Generate</button>
+          </div>
+        </div>
+
+        <div class="ov-right">
+          <div class="card ov-chart in-blur" style="--d:.7s">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[14px] font-medium text-ink">Engagement trend</span>
+              <span class="ov-select">Last 30 days ${ic('chevron-down', 'w-3 h-3')}</span>
+            </div>
+            <div class="relative mt-3">
+              <span class="chart-flag">+12%</span>
+              <svg viewBox="0 0 260 120" preserveAspectRatio="none" role="img" aria-label="Engagement rising over the last 30 days (sample data)">
+                <defs><linearGradient id="ovArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5B55E6" stop-opacity=".3"/><stop offset="1" stop-color="#5B55E6" stop-opacity="0"/></linearGradient></defs>
+                <g class="grid-lines"><line x1="0" y1="20" x2="260" y2="20"/><line x1="0" y1="50" x2="260" y2="50"/><line x1="0" y1="80" x2="260" y2="80"/><line x1="0" y1="110" x2="260" y2="110"/></g>
+                <path class="area-fill" d="M0,98 C14,96 22,92 34,93 S52,86 64,87 S84,80 96,82 S116,74 128,72 S146,76 158,66 S180,58 192,56 S214,48 226,40 S246,30 260,24 L260,120 L0,120 Z" fill="url(#ovArea)"/>
+                <path class="area-line" d="M0,98 C14,96 22,92 34,93 S52,86 64,87 S84,80 96,82 S116,74 128,72 S146,76 158,66 S180,58 192,56 S214,48 226,40 S246,30 260,24" fill="none"/>
+                <circle class="area-end" cx="258" cy="24.5" r="4"/>
+              </svg>
+              <div class="flex justify-between text-[10.5px] text-muted mt-1.5"><span>${fmtDate(addDays(TODAY, -30))}</span><span>${fmtDate(addDays(TODAY, -20))}</span><span>${fmtDate(addDays(TODAY, -10))}</span><span>Today</span></div>
+            </div>
+          </div>
+
+          <div class="card ov-bars in-blur" style="--d:.82s">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[14px] font-medium text-ink">Posts by platform</span>
+              <a href="#/calendar" class="ov-select">All time ${ic('chevron-right', 'w-3 h-3')}</a>
+            </div>
+            <ul class="mt-3.5 space-y-3">
+              ${byP.map(b => `<li class="ov-bar">${pIcon(b.id, 'sm')}<span class="text-[13px] text-slate-700">${PLATFORMS[b.id].name}</span><span class="track"><i class="fill f-${b.id}" style="width:${Math.max(6, Math.round((b.n / maxP) * 100))}%"></i></span><b class="tnum">${b.n}</b></li>`).join('')}
+            </ul>
+          </div>
+        </div>
+
+        <div class="ov-bottom">
+          <a href="#/approvals" class="card ov-kpi in-blur" style="--d:.95s">
+            <span class="ov-kpi-h">${ic('list-checks', 'w-4 h-4 text-amber-500')}Awaiting review</span>
+            <span class="val tnum"><b data-count="${review}">${review}</b> <small>posts</small></span>
+            ${sparkBars([2, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8], 'orange')}
+            <span class="flex items-center gap-2">${deltaPill('Today', 'warn')}<span class="text-[11.5px] text-sub">review queue</span></span>
+          </a>
+          <a href="#/calendar" class="card ov-kpi in-blur" style="--d:1.02s">
+            <span class="ov-kpi-h">${ic('calendar-clock', 'w-4 h-4 text-blue-500')}Scheduled</span>
+            <span class="val tnum"><b data-count="${k.scheduled}">${k.scheduled}</b> <small>queued</small></span>
+            ${sparkBars([3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10], 'blue')}
+            <span class="flex items-center gap-2">${deltaPill('+4')}<span class="text-[11.5px] text-sub">vs last week</span></span>
+          </a>
+          <a href="#/studio" class="card ov-kpi in-blur" style="--d:1.09s">
+            <span class="ov-kpi-h">${ic('sparkles', 'w-4 h-4 text-brand-600')}AI generations</span>
+            <span class="val tnum"><b data-count="${state.credits.used}">${num(state.credits.used)}</b> <small>credits</small></span>
+            ${sparkBars([4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 10], 'indigo')}
+            <span class="flex items-center gap-2">${deltaPill(`${num(state.credits.total - state.credits.used)} left`, 'neutral', 'zap')}</span>
+          </a>
+          <a href="#/social" class="card ov-kpi in-blur" style="--d:1.16s">
+            <span class="ov-kpi-h">${ic('share-2', 'w-4 h-4 text-emerald-500')}Channels live</span>
+            <span class="val tnum"><b data-count="${connected}">${connected}</b> <small>of 5</small></span>
+            ${sparkBars([1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4].map(v => Math.min(v, connected || 1)), 'green')}
+            <span class="flex items-center gap-2">${connected < 5 ? deltaPill(`${5 - connected} to connect`, 'warn', 'plug') : deltaPill('All connected')}</span>
+          </a>
+          <button class="card ov-promo in-blur" style="--d:1.23s" data-action="add-property">
+            <span class="ov-promo-text">
+              <b>Your Next Listing, Live in Minutes</b>
+              <span>Paste a listing URL or add details manually. AI drafts every platform.</span>
+              <span class="btn btn-primary btn-xs">${ic('download')}Import a listing</span>
+            </span>
+            <span class="ov-promo-img" aria-hidden="true" style="background-image:url('${U('1613490493576-7fde63acd811', 700, 420)}')"></span>
+          </button>
+        </div>
+
+      </div>
+    </section>`;
+}
+
+/* Count-up for [data-count] numbers inside a freshly rendered page */
+function countUp(root) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  $$('[data-count]', root).forEach(el => {
+    const target = Number(el.dataset.count);
+    if (!target) return;
+    const host = el.closest('[style*="--d"]');
+    const delay = host ? parseFloat(getComputedStyle(host).getPropertyValue('--d')) * 1000 || 0 : 0;
+    el.textContent = '0';
+    setTimeout(() => {
+      const t0 = performance.now(), dur = 1100;
+      const step = now => { const t = Math.min(1, (now - t0) / dur); el.textContent = num(Math.round(target * (1 - Math.pow(1 - t, 3)))); if (t < 1 && document.contains(el)) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    }, delay + 120);
+  });
 }
 
 function featuredCaption(p) {
@@ -2815,6 +2961,7 @@ function render({ keep = false } = {}) {
   const crumb = $('#crumb'); if (crumb) crumb.textContent = ROUTE_TITLES[state.route];
   document.title = `${ROUTE_TITLES[state.route]} · RexEngine`;
   icons();
+  if (!keep) countUp(view);
   if (keep) window.scrollTo(0, scrollY); else window.scrollTo(0, 0);
   if (!keep && state.route === 'studio' && S.pendingGenerate) { S.pendingGenerate = false; setTimeout(studioGenerate, 450); }
 }
@@ -2828,8 +2975,8 @@ const A = {
   'open-drawer': () => openDrawer(),
   'close-drawer': () => closeDrawer(),
   'toggle-rail': () => toggleRail(),
-  'user-menu': el => openDropdown(el, userMenuHTML(), { align: el.closest('#sidebar') ? 'left' : 'right', width: 248 }),
-  'help-menu': el => openDropdown(el, helpMenuHTML(), { width: 230 }),
+  'user-menu': el => openDropdown(el, userMenuHTML(), { align: el.closest('#sidebar') ? (window.innerWidth >= 1024 ? 'side' : 'left') : 'right', width: 248 }),
+  'help-menu': el => openDropdown(el, helpMenuHTML(), { align: el.closest('#sidebar') && window.innerWidth >= 1024 ? 'side' : 'left', width: 230 }),
   'notif-menu': el => openDropdown(el, notifMenuHTML(), { width: 360, focus: false }),
   'notif-read-all': () => { state.notifications.forEach(n => { n.unread = false; }); renderTopbar(); toast('All caught up', 'Notifications marked as read.', 'success'); },
   'notif-open': el => { const n = state.notifications.find(x => x.id === el.dataset.id); if (!n) return; n.unread = false; renderTopbar(); go(n.route); },
@@ -2837,7 +2984,7 @@ const A = {
   shortcuts: () => openShortcuts(),
   tour: () => openTour(),
   upgrade: () => toast('You’re on the Pro plan', 'Plan upgrades are available in the full product.', 'info'),
-  'sign-out': () => toast('Sign out is disabled', 'This is a demo workspace.', 'info'),
+  'sign-out': () => { closeDropdown(); closeAllModals(); location.href = 'landing.html'; },
   'demo-toast': el => toast('Demo action', el.dataset.msg || 'Available in the full product.', 'info'),
   'hide-banner': () => { state.bannerHidden = true; store.set('bannerHidden', true); refresh(); },
 
@@ -3087,7 +3234,6 @@ document.addEventListener('error', e => {
    ========================================================================== */
 function boot() {
   initData();
-  if (store.get('rail', false)) document.documentElement.classList.add('rail');
   state.route = parseRoute();
   renderTopbar();
   render();
